@@ -26,6 +26,30 @@ public class CustomPotionHelper {
 	
 	public final static int[] SUPPORT_IDS = new int[] { 1, 3, 5, 6, 8, 10, 11, 12, 13, 14, 16, 21, 22, 23 };
 	
+	public static final int SWIFTNESS = 1;
+	public static final int SLOWNESS = 2;
+	public static final int HASTE = 3;
+	public static final int DULLNESS = 4;
+	public static final int STRENGTH = 5;
+	public static final int HEALING = 6;
+	public static final int HARMING = 7;
+	public static final int LEAPING = 8;
+	public static final int NAUSEA = 9;
+	public static final int REGENATION = 10;
+	public static final int RESISTANCE = 11;
+	public static final int FIRE_RESISTANCE = 12;
+	public static final int WATER_BREATHING = 13;
+	public static final int INVISIBILITY = 14;
+	public static final int BLINDNESS = 15;
+	public static final int NIGHT_VISION = 16;
+	public static final int HUNGER = 17;
+	public static final int WEAKNESS = 18;
+	public static final int POISON = 19;
+	public static final int DECAY = 20;
+	public static final int HEALTH_BOOST = 21;
+	public static final int ABSORPTION = 22;
+	public static final int SATURATION = 23;
+	
 	public CustomPotionHelper(){
 		id = 1;
 		duration = this.isInstant() ? INSTANT_DURATION : DURATION_TABLE[0];

@@ -94,16 +94,17 @@ public class ItemPotionFocus extends Item implements IWandFocus {
 
         	ItemStack focus = getFocusItem(itemstack);
             NBTTagCompound tag = CustomPotionHelper.findPotionNBT(focus);
+            CustomPotionHelper effect = new CustomPotionHelper(1, 0, 0);
             if(tag != null){
-	        	CustomPotionHelper effect = CustomPotionHelper.getInstanceFromNBTTag(tag);
-	        	effect.setDurationCode(0);
-//	        	System.out.println("Foci: " + effect.getId() + ", " + effect.getAmplifier() + ", " + effect.getDuration());
-	        	if(consumeAllVis(itemstack, player, getVisCost(effect), true, false)){
-	                world.playSoundAtEntity(player, "random.bow", 0.5F, 0.4F / (itemRand.nextFloat() * 0.4F + 0.8F));
-	                ItemStack potion = effect.getSampleItem(true);
-	        		world.spawnEntityInWorld(new EntityPotion(world, player, potion));
-	        	}
+	        	effect = CustomPotionHelper.getInstanceFromNBTTag(tag);
             }
+        	effect.setDurationCode(0);
+//	        	System.out.println("Foci: " + effect.getId() + ", " + effect.getAmplifier() + ", " + effect.getDuration());
+        	if(consumeAllVis(itemstack, player, getVisCost(effect), true, false)){
+                world.playSoundAtEntity(player, "random.bow", 0.5F, 0.4F / (itemRand.nextFloat() * 0.4F + 0.8F));
+                ItemStack potion = effect.getSampleItem(true);
+        		world.spawnEntityInWorld(new EntityPotion(world, player, potion));
+        	}
         }
         return itemstack;
 	}
@@ -159,13 +160,13 @@ public class ItemPotionFocus extends Item implements IWandFocus {
 	@Override
 	public void addInformation(ItemStack itemstack, EntityPlayer player, List tooltip, boolean par4) {
 		NBTTagCompound tag = CustomPotionHelper.findPotionNBT(itemstack);
-		CustomPotionHelper potion = new CustomPotionHelper();
+		CustomPotionHelper potion = new CustomPotionHelper(1, 0, 0);
 		if(tag != null){
 			potion = CustomPotionHelper.getInstanceFromNBTTag(tag);
-			String name = StatCollector.translateToLocal(Potion.potionTypes[potion.getId()].getName());
-			String lv = StatCollector.translateToLocal("potion.potency." + potion.getAmplifier());
-			tooltip.add(name + " " + lv);
 		}
+		String name = StatCollector.translateToLocal(Potion.potionTypes[potion.getId()].getName());
+		String lv = StatCollector.translateToLocal("potion.potency." + potion.getAmplifier());
+		tooltip.add(name + " " + lv);
 		AspectList al = this.getVisCost(potion);
 		if (al!=null && al.size()>0) {
 			tooltip.add(StatCollector.translateToLocal(isVisCostPerTick() ? "item.Focus.cost2" : "item.Focus.cost1"));

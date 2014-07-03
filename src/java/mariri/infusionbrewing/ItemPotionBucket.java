@@ -56,6 +56,7 @@ public class ItemPotionBucket extends ItemBucket {
 		if(fluid instanceof BlockFluidPotion){
 			String name = StatCollector.translateToLocal(Potion.potionTypes[fluid.getPotionEffect()].getName());
 			tooltip.add(name);
+			tooltip.add(CustomPotionHelper.isSupport(potionEffect) ? " - Good Status" : " - Bad Status");
 		}
 	}
 }

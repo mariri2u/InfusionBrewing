@@ -1,7 +1,6 @@
 package mariri.infusionbrewing;
 
 import net.minecraft.creativetab.CreativeTabs;
-import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -17,7 +16,7 @@ public class CreativeTabBrewing extends CreativeTabs {
 	@SideOnly(Side.CLIENT)
 	public Item getTabIconItem()
 	{
-		return Items.potionitem;
+		return InfusionBrewing.itemPotionBuckets[0];
 	}
  
 	@Override

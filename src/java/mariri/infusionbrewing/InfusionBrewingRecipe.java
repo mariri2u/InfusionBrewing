@@ -14,7 +14,7 @@ import thaumcraft.api.crafting.InfusionRecipe;
 
 public class InfusionBrewingRecipe extends InfusionRecipe {
 	
-	public enum MODE { AMPLIFIER, DURATION, SPLASH, BAUBLES };
+	public enum MODE { AMPLIFIER, DURATION, SPLASH, BAUBLES, FOCUS };
 	
 	private MODE mode = MODE.AMPLIFIER;
 	
@@ -56,6 +56,9 @@ public class InfusionBrewingRecipe extends InfusionRecipe {
 			else if(mode == MODE.BAUBLES){
 				 if(potion.isInstant()){ return false; }
 				 else if(!potion.isMaxDuration()) { return false; }
+			}else if(mode == MODE.FOCUS) {
+				if(!ItemPotion.isSplash(i2.getItemDamage())){ return false; }
+				else if(!potion.isMaxDuration()){ return false; }
 			}
 		}
 		
@@ -135,7 +138,7 @@ public class InfusionBrewingRecipe extends InfusionRecipe {
 			potion.writeNBTTag(tag);
 		}else if(mode == MODE.SPLASH){
 			output.setItemDamage(CustomPotionHelper.metadataTable[potion.getId() - 1][2]);
-		}else if(mode == MODE.BAUBLES){
+		}else if(mode == MODE.BAUBLES || mode == MODE.FOCUS){
 			output = ((ItemStack)super.getRecipeOutput(input)).copy();
 			output.setTagCompound(input.getTagCompound());
 //			NBTTagCompound t = CustomPotionHelper.createVoidNBTTag();

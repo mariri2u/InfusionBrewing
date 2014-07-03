@@ -53,16 +53,17 @@ public class ItemPotionBaubles extends Item implements IBauble{
 	public void onWornTick(ItemStack itemstack, EntityLivingBase player){
 		if(player instanceof EntityPlayer && !player.worldObj.isRemote) {
 			NBTTagCompound tag = CustomPotionHelper.findPotionNBT(itemstack);
+			CustomPotionHelper potion = new CustomPotionHelper(1, 0, 0);
 			if(tag != null){
-				CustomPotionHelper potion = CustomPotionHelper.getInstanceFromNBTTag(tag);
-				PotionEffect effect = player.getActivePotionEffect(Potion.potionTypes[potion.getId()]);
-				if(effect == null || effect.getAmplifier() < potion.getAmplifier() || effect.getDuration() < UPDATE_TICK) {
-					if(ThaumcraftApiHelper.consumeVisFromInventory((EntityPlayer)player, cost)){
-						if(effect != null && effect.getAmplifier() < potion.getAmplifier()){
-							player.removePotionEffect(potion.getId());
-						}
-						player.addPotionEffect(new PotionEffect(potion.getId(), getInterval(potion.getAmplifier()) + UPDATE_TICK, potion.getAmplifier(), true));
+				potion = CustomPotionHelper.getInstanceFromNBTTag(tag);
+			}
+			PotionEffect effect = player.getActivePotionEffect(Potion.potionTypes[potion.getId()]);
+			if(effect == null || effect.getAmplifier() < potion.getAmplifier() || effect.getDuration() < UPDATE_TICK) {
+				if(ThaumcraftApiHelper.consumeVisFromInventory((EntityPlayer)player, cost)){
+					if(effect != null && effect.getAmplifier() < potion.getAmplifier()){
+						player.removePotionEffect(potion.getId());
 					}
+					player.addPotionEffect(new PotionEffect(potion.getId(), getInterval(potion.getAmplifier()) + UPDATE_TICK, potion.getAmplifier(), true));
 				}
 			}
 		}
@@ -107,13 +108,13 @@ public class ItemPotionBaubles extends Item implements IBauble{
 	@Override
 	public void addInformation(ItemStack itemstack, EntityPlayer player, List tooltip, boolean par4) {
 		NBTTagCompound tag = CustomPotionHelper.findPotionNBT(itemstack);
-		CustomPotionHelper potion = new CustomPotionHelper();
+		CustomPotionHelper potion = new CustomPotionHelper(1, 0, 0);
 		if(tag != null){
 			potion = CustomPotionHelper.getInstanceFromNBTTag(tag);
-			String name = StatCollector.translateToLocal(Potion.potionTypes[potion.getId()].getName());
-			String lv = StatCollector.translateToLocal("potion.potency." + potion.getAmplifier());
-			tooltip.add(name + " " + lv);
 		}
+		String name = StatCollector.translateToLocal(Potion.potionTypes[potion.getId()].getName());
+		String lv = StatCollector.translateToLocal("potion.potency." + potion.getAmplifier());
+		tooltip.add(name + " " + lv);
 	}
 	  
 	@Override
