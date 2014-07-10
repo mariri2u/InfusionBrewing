@@ -1,4 +1,4 @@
-package mariri.infusionbrewing;
+package mariri.infusionbrewing.handler;
 
 
 import java.util.HashMap;

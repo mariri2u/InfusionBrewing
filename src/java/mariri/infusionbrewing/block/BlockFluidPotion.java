@@ -1,40 +1,39 @@
-package mariri.infusionbrewing;
+package mariri.infusionbrewing.block;
 
-import java.util.List;
 import java.util.Random;
 
+import mariri.infusionbrewing.misc.CustomPotionHelper;
+import mariri.infusionbrewing.misc.SpawnHelper;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityCreature;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.IEntityLivingData;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.monster.EntityBlaze;
 import net.minecraft.entity.monster.EntityCaveSpider;
 import net.minecraft.entity.monster.EntityCreeper;
+import net.minecraft.entity.monster.EntityEnderman;
 import net.minecraft.entity.monster.EntityPigZombie;
 import net.minecraft.entity.monster.EntitySkeleton;
+import net.minecraft.entity.monster.EntitySpider;
 import net.minecraft.entity.monster.EntityWitch;
 import net.minecraft.entity.monster.EntityZombie;
+import net.minecraft.entity.passive.EntityBat;
 import net.minecraft.entity.passive.EntitySquid;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.potion.PotionEffect;
-import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.IIcon;
-import net.minecraft.util.MathHelper;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.ForgeDirection;
 import net.minecraftforge.fluids.BlockFluidClassic;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidRegistry;
-import thaumcraft.api.ItemApi;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -43,8 +42,9 @@ public class BlockFluidPotion extends BlockFluidClassic {
 	@SideOnly(Side.CLIENT)
 	protected IIcon[] theIcon;
 	protected int potionEffect;
-	protected boolean explode;
-	protected boolean spawn;
+	protected boolean explode = true;
+	protected boolean spawn = true;
+	protected boolean infinity = true;
 	
 	public BlockFluidPotion(Fluid fluid, Material material) {
 		super(fluid, material);
@@ -66,6 +66,11 @@ public class BlockFluidPotion extends BlockFluidClassic {
 	
 	public BlockFluidPotion setSpawn(boolean value){
 		this.spawn = value;
+		return this;
+	}
+	
+	public BlockFluidPotion setInfinity(boolean value){
+		this.infinity = value;
 		return this;
 	}
 	
@@ -142,46 +147,79 @@ public class BlockFluidPotion extends BlockFluidClassic {
     	if(infusion instanceof BlockFluidPotion){
     		int effect = ((BlockFluidPotion)infusion).getPotionEffect();
     		if(support != CustomPotionHelper.isSupport(effect)){
-    			world.setBlockToAir(x, y, z);
             	createExplosion(world, x, y, z);
     		}else if(support){
+    			// Block
     			if(instant == CustomPotionHelper.isInstant(effect)){
         			world.setBlock(x, y, z, Blocks.gravel);
     			}else{
         			world.setBlock(x, y, z, Blocks.sand);
     			}
-				if(this.potionEffect == CustomPotionHelper.WATER_BREATHING || effect == CustomPotionHelper.WATER_BREATHING){
-					spawnCreature(world, x, y + 2, z, new EntitySquid(world), 0.1);
+    			// Creature
+				if(this.potionEffect == CustomPotionHelper.STRENGTH || effect == CustomPotionHelper.STRENGTH){
+					spawnCreature(world, x, y, z, new EntityEnderman(world), 0.1);
 				}
-    		}else{
+				if(this.potionEffect == CustomPotionHelper.LEAPING || effect == CustomPotionHelper.LEAPING){
+					spawnCreature(world, x, y, z, new EntityBat(world), 0.1);
+				}
+				if(this.potionEffect == CustomPotionHelper.WATER_BREATHING || effect == CustomPotionHelper.WATER_BREATHING){
+					spawnCreature(world, x, y, z, new EntitySquid(world), 0.1);
+				}
+				if(this.potionEffect == CustomPotionHelper.INVISIBILITY || effect == CustomPotionHelper.INVISIBILITY){
+					spawnCreature(world, x, y, z, new EntityVillager(world), 0.1);
+				}
+				if(this.potionEffect == CustomPotionHelper.NIGHT_VISION || effect == CustomPotionHelper.NIGHT_VISION){
+					spawnCreature(world, x, y, z, new EntitySpider(world), 0.1);
+				}
+			}else{
+				// Block
 				if(instant == CustomPotionHelper.isInstant(effect)){
 	    			world.setBlock(x, y, z, Blocks.netherrack);
 				}else{
 	    			world.setBlock(x, y, z, Blocks.soul_sand);
 				}
-				if(this.potionEffect == CustomPotionHelper.DECAY || effect == CustomPotionHelper.DECAY){
-					spawnCreature(world, x, y + 2, z, new EntitySkeleton(world), 1.0);
+				// Creature
+				if(this.potionEffect == CustomPotionHelper.SLOWNESS || effect == CustomPotionHelper.SLOWNESS){
+					spawnCreature(world, x, y, z, new EntityWitch(world), 1.0);
+				}
+				if(this.potionEffect == CustomPotionHelper.DULLNESS || effect == CustomPotionHelper.DULLNESS){
+					spawnCreature(world, x, y, z, new EntityCreeper(world), 1.0);
+				}
+				if(this.potionEffect == CustomPotionHelper.HARMING || effect == CustomPotionHelper.HARMING){
+					// duplicate
+					spawnCreature(world, x, y, z, new EntityWitch(world), 1.0);
+				}
+				if(this.potionEffect == CustomPotionHelper.NAUSEA || effect == CustomPotionHelper.NAUSEA){
+					// duplicate
+					if(world.provider.isHellWorld){
+						spawnCreature(world, x, y, z, new EntityPigZombie(world), 1.0);
+					}else{
+						spawnCreature(world, x, y, z, new EntityZombie(world), 1.0);
+					}
+				}
+				if(this.potionEffect == CustomPotionHelper.BLINDNESS || effect == CustomPotionHelper.BLINDNESS){
+					spawnCreature(world, x, y, z, new EntityBlaze(world), 1.0);
 				}
 				if(this.potionEffect == CustomPotionHelper.HUNGER || effect == CustomPotionHelper.HUNGER){
 					if(world.provider.isHellWorld){
-						spawnCreature(world, x, y + 2, z, new EntityPigZombie(world), 1.0);
+						spawnCreature(world, x, y, z, new EntityPigZombie(world), 1.0);
 					}else{
-						spawnCreature(world, x, y + 2, z, new EntityZombie(world), 1.0);
+						spawnCreature(world, x, y, z, new EntityZombie(world), 1.0);
 					}
 				}
-				if(this.potionEffect == CustomPotionHelper.POISON || effect == CustomPotionHelper.POISON){
-					spawnCreature(world, x, y + 2, z, new EntityCaveSpider(world), 1.0);
-				}
-				if(this.potionEffect == CustomPotionHelper.HARMING || effect == CustomPotionHelper.HARMING){
-					spawnCreature(world, x, y + 2, z, new EntityWitch(world), 1.0);
-				}
 				if(this.potionEffect == CustomPotionHelper.WEAKNESS || effect == CustomPotionHelper.WEAKNESS){
-					spawnCreature(world, x, y + 2, z, new EntityVillager(world), 0.2);
+					// duplicate
+					spawnCreature(world, x, y, z, new EntitySkeleton(world), 1.0);
 				}
-    		}
+				if(this.potionEffect == CustomPotionHelper.POISON || effect == CustomPotionHelper.POISON){
+					spawnCreature(world, x, y, z, new EntityCaveSpider(world), 1.0);
+				}
+				if(this.potionEffect == CustomPotionHelper.DECAY || effect == CustomPotionHelper.DECAY){
+					spawnCreature(world, x, y, z, new EntitySkeleton(world), 1.0);
+				}
+			}
     	}else if(infusion.getMaterial() == Material.lava){
     		if(support){
-    			world.setBlockToAir(x, y, z);
             	createExplosion(world, x, y, z);
     		}else{
     			world.setBlock(x, y, z, Blocks.sandstone);
@@ -191,15 +229,20 @@ public class BlockFluidPotion extends BlockFluidClassic {
             	world.setBlock(x, y, z, Blocks.glass);
     		}else{
     			world.setBlock(x, y, z, Blocks.glowstone);
-    			spawnCreature(world, x, y + 2, z, new EntityCreeper(world), 1.0);
+    			spawnCreature(world, x, y, z, new EntityCreeper(world), 1.0);
+    			spawnCreature(world, x, y, z, new EntityBlaze(world), 1.0);
+    			spawnCreature(world, x, y, z, new EntityCreeper(world), 0.8);
+    			spawnCreature(world, x, y, z, new EntityBlaze(world), 0.8);
     		}
     	}else if(fluid != null && infusion.isFlammable(world, x, y, z, ForgeDirection.UP)){
     		if(support){
-    			world.setBlockToAir(x, y, z);
             	createExplosion(world, x, y, z);
     		}else{
     			world.setBlock(x, y, z, Blocks.coal_block);
-    			spawnCreature(world, x, y + 2, z, new EntityBlaze(world), 1.0);
+				spawnCreature(world, x, y, z, new EntityPigZombie(world), 1.0);
+				spawnCreature(world, x, y, z, new EntitySkeleton(world), 1.0);
+				spawnCreature(world, x, y, z, new EntityPigZombie(world), 0.8);
+				spawnCreature(world, x, y, z, new EntitySkeleton(world), 0.8);
     		}
     	}else if(infusion.getMaterial() == Material.water){
     		if(support){
@@ -209,42 +252,15 @@ public class BlockFluidPotion extends BlockFluidClassic {
     		}
     	}else if(infusion == Blocks.fire){
     		if(support){
-    			world.setBlockToAir(x, y, z);
             	createExplosion(world, x, y, z);
     		}
     	}
     }
     
     private void spawnCreature(World world, int x, int y, int z, EntityLiving creature, double chance){
-		List<EntityCreature> list = world.getEntitiesWithinAABB(
-				creature.getClass(),
-				AxisAlignedBB.getBoundingBox(x -5, y - 5, z - 5, x + 6, y + 6, z + 6));
-		if(spawn && list.size() < 10 && world.rand.nextDouble() < chance){
-	        creature.setLocationAndAngles(x + 0.5, y, z + 0.5, MathHelper.wrapAngleTo180_float(world.rand.nextFloat() * 360.0F), 0.0F);
-	        creature.rotationYawHead = creature.rotationYaw;
-	        creature.renderYawOffset = creature.rotationYaw;
-	        creature.onSpawnWithEgg((IEntityLivingData)null);
-
-			if(creature instanceof EntityZombie){
-				((EntityZombie)creature).setChild(true);
-			}else if(creature instanceof EntityCreeper){
-				creature.getDataWatcher().updateObject(17, Byte.valueOf((byte)1));
-			}
-			if(creature instanceof EntityZombie || creature instanceof EntitySkeleton){
-				if(creature instanceof EntityZombie){
-					creature.setCurrentItemOrArmor(0, ItemApi.getItem("itemSwordThaumium", 0));
-				}else if(creature instanceof EntitySkeleton){
-					creature.setCurrentItemOrArmor(0, new ItemStack(Items.bow));
-				}
-				creature.setCurrentItemOrArmor(1, ItemApi.getItem("itemHelmetThaumium", 0));
-				creature.setCurrentItemOrArmor(2, ItemApi.getItem("itemChestThaumium", 0));
-				creature.setCurrentItemOrArmor(3, ItemApi.getItem("itemLegsThaumium", 0));
-				creature.setCurrentItemOrArmor(4, ItemApi.getItem("itemBootsThaumium", 0));
-			}
-			
-	        world.spawnEntityInWorld(creature);
-	        creature.playLivingSound();
-		}
+    	if(spawn){
+    		SpawnHelper.spawnCreature(world, x, y, z, creature, chance, 4);
+    	}
     }
     
     private boolean reactSunlight(World world, int x, int y, int z){
@@ -333,7 +349,7 @@ public class BlockFluidPotion extends BlockFluidClassic {
 //	            world.notifyBlocksOfNeighborChange(x, y, z, Blocks.lava);
 //			}
 //		}else if(potCount >= 2 && world.getBlock(x, y - 1, z).isNormalCube()){
-		if(count >= 2 && world.getBlock(x, y - 1, z).isNormalCube()){
+		if(infinity && count >= 2 && world.getBlock(x, y - 1, z).isNormalCube()){
 			world.setBlockMetadataWithNotify(x, y, z, 0, 2);
             world.scheduleBlockUpdate(x, y, z, this, 0);
             world.notifyBlocksOfNeighborChange(x, y, z, this);

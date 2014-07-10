@@ -1,5 +1,6 @@
 #
-item.infusedGlassBottle.name=Infused Glass Bottle
+item.magicBottle.name=Magic Bottle
+item.magicBucket.name=Magic Bucket
 item.potionInfusedAmulet.name=Potion Infused Amulet
 item.potionInfusedBelt.name=Potion Infused Belt
 item.potionInfusedRing.name=Potion Infused Ring
@@ -52,15 +53,18 @@ tile.fluidPotion21.name=Absorption Potion
 tile.fluidPotion22.name=Saturation Potion
 
 tc.research_category.INFUSION_BREWING=Infusion Brewing
-tc.research_name.INFUSED_BOTTLE=Infused Glass Bottle
-tc.research_text.INFUSED_BOTTLE=[IB] Fill up potion
-tc.research_page.INFUSED_BOTTLE.0=ガラス瓶に魔力を込めると液体ポーションを汲めるようになります
+tc.research_name.MAGIC_BOTTLE=Magic Bottle
+tc.research_text.MAGIC_BOTTLE=[IB] Fill up potion
+tc.research_page.MAGIC_BOTTLE.0=ガラス瓶に魔力を込めると液体ポーションを汲めるようになります
+tc.research_name.MAGIC_BUCKET=Magic Bucket
+tc.research_text.MAGIC_BUCKET=[IB] If use dispenser
+tc.research_page.MAGIC_BUCKET.0=ディスペンサーで液体ポーションを扱う用です<BR>手動では使えません<BR>単独クラフトでバニラの空バケツに戻せます<BR>設定でdispenseMagicBucketをtrueにすると有効になります<BR>他MOD様と競合したときご利用ください
 tc.research_name.FLUID_POTION=Fluid Potion
 tc.research_text.FLUID_POTION=[IB] Place potions in world
-tc.research_page.FLUID_POTION.0=水バケツを醸造してポーションバケツにします<BR>ポーションは地面に設置し無限水源を作ることができます<BR>設置したポーションはInfused Glass Bottleで汲むことができます<LINE>良性ステータスのポーションをネザーに設置したり日光や火気に触れると爆発します<BR>水源が他の液体に触れると様々なブロックに変化したりモンスターが発生します
+tc.research_page.FLUID_POTION.0=水バケツを醸造してポーションバケツにします<BR>ポーションは地面に設置し無限水源を作ることができます<BR>設置したポーションはMagic Bottleで汲むことができます<LINE>良性ステータスのポーションをネザーに設置したり悪性ポーションや日光や火気に触れると爆発します<BR>液体同士が触れると様々なブロックに変化したりモンスターが発生します
 tc.research_name.DURATION=Duration
 tc.research_text.DURATION=[IB] Duration too long
-tc.research_page.DURATION.0=ポーションの効果を長くします<BR>効果時間は1分・2分・4分・8分・16分と順に伸びていきます<BR>16分まで延長したポーションはアクセサリーやフォーカスの素材になります
+tc.research_page.DURATION.0=ポーションの効果を長くします<BR>効果時間は2分・4分・8分・16分と順に伸びていきます<BR>16分まで延長したポーションはアクセサリーやフォーカスの素材になります
 tc.research_name.AMPLIFIER=Amplifier
 tc.research_text.AMPLIFIER=[IB] Too strong
 tc.research_page.AMPLIFIER.0=ポーションの効果を強くします<BR>レベル4まで上げることができます

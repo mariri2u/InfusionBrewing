@@ -1,4 +1,4 @@
-package mariri.infusionbrewing;
+package mariri.infusionbrewing.misc;
 
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
@@ -13,7 +13,7 @@ public class CustomPotionHelper {
 	private int duration;
 	private int amplifier;
 	
-	public final static int[] DURATION_TABLE = new int[]{ 1200, 2400, 4800, 9600, 19200 };
+	public final static int[] DURATION_TABLE = new int[]{ 2400, 4800, 9600, 19200 };
 	
 	private final static int[] INSTANT_IDS = new int[] { 6, 7 };
 	public final static int INSTANT_DURATION = 1;
@@ -217,6 +217,13 @@ public class CustomPotionHelper {
 		itemstack.setItemDamage(metadataTable[id - 1][splash ? 2 : 0]);
 		return itemstack;
 	}
+	
+	public static ItemStack getSampleItem(int id, int durationCode, int amplifier, boolean splash, int stacksize){
+		ItemStack itemstack = getSampleItem(id, durationCode, amplifier, splash);
+		itemstack.stackSize = stacksize;
+		return itemstack;
+	}
+
 	
 	public static final int[][] metadataTable = new int[][]{
 		new int[] {8194, 8226, 16386, 8258}, // swiftness

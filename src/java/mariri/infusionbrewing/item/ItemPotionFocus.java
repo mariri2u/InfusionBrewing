@@ -1,9 +1,10 @@
-package mariri.infusionbrewing;
+package mariri.infusionbrewing.item;
 
 import java.lang.reflect.Method;
 import java.text.DecimalFormat;
 import java.util.List;
 
+import mariri.infusionbrewing.misc.CustomPotionHelper;
 import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.projectile.EntityPotion;
@@ -16,6 +17,7 @@ import net.minecraft.util.IIcon;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
+import thaumcraft.api.ThaumcraftApiHelper;
 import thaumcraft.api.aspects.Aspect;
 import thaumcraft.api.aspects.AspectList;
 import thaumcraft.api.wands.IWandFocus;
@@ -100,7 +102,7 @@ public class ItemPotionFocus extends Item implements IWandFocus {
             }
         	effect.setDurationCode(0);
 //	        	System.out.println("Foci: " + effect.getId() + ", " + effect.getAmplifier() + ", " + effect.getDuration());
-        	if(consumeAllVis(itemstack, player, getVisCost(effect), true, false)){
+        	if(ThaumcraftApiHelper.consumeVisFromWand(itemstack, player, getVisCost(effect), true, false)){
                 world.playSoundAtEntity(player, "random.bow", 0.5F, 0.4F / (itemRand.nextFloat() * 0.4F + 0.8F));
                 ItemStack potion = effect.getSampleItem(true);
         		world.spawnEntityInWorld(new EntityPotion(world, player, potion));
@@ -205,25 +207,25 @@ public class ItemPotionFocus extends Item implements IWandFocus {
 		return focus;
 	}
 	
-	private boolean consumeAllVis(ItemStack itemstack, EntityPlayer player, AspectList aspects, boolean doit, boolean crafting){
-		boolean result = false;
-		try {
-			Item item = itemstack.getItem();
-			Class clazz = item.getClass();
-//			System.out.println("BBBB");
-			Method method = clazz.getMethod(
-					"consumeAllVis",
-					new Class[]{ ItemStack.class, EntityPlayer.class, AspectList.class, boolean.class, boolean.class });
-//			System.out.println("AAAA");
-			result = (Boolean)method.invoke(
-					item,
-					new Object[]{ itemstack, player, aspects, doit, crafting });
-//			System.out.println("Bool: " + result);
-		} catch (Exception ex) {
-//			System.out.println("EXX");
-//			FMLLog.warning("[Thaumcraft] Could not retrieve item identified by: " + itemString);
-		}
-		return result;
-		
-	}
+//	private boolean consumeAllVis(ItemStack itemstack, EntityPlayer player, AspectList aspects, boolean doit, boolean crafting){
+//		boolean result = false;
+//		try {
+//			Item item = itemstack.getItem();
+//			Class clazz = item.getClass();
+////			System.out.println("BBBB");
+//			Method method = clazz.getMethod(
+//					"consumeAllVis",
+//					new Class[]{ ItemStack.class, EntityPlayer.class, AspectList.class, boolean.class, boolean.class });
+////			System.out.println("AAAA");
+//			result = (Boolean)method.invoke(
+//					item,
+//					new Object[]{ itemstack, player, aspects, doit, crafting });
+////			System.out.println("Bool: " + result);
+//		} catch (Exception ex) {
+////			System.out.println("EXX");
+////			FMLLog.warning("[Thaumcraft] Could not retrieve item identified by: " + itemString);
+//		}
+//		return result;
+//		
+//	}
 }

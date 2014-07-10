@@ -1,4 +1,4 @@
-package mariri.infusionbrewing;
+package mariri.infusionbrewing.misc;
 
 import java.util.ArrayList;
 
@@ -123,17 +123,17 @@ public class InfusionBrewingRecipe extends InfusionRecipe {
 		if(mode == MODE.AMPLIFIER){
 			potion.incrementAmplifier();
 			if(ItemPotion.isSplash(input.getItemDamage())){
-				output.setItemDamage(CustomPotionHelper.metadataTable[potion.getId() - 1][0]);
-			}else{
 				output.setItemDamage(CustomPotionHelper.metadataTable[potion.getId() - 1][2]);
+			}else{
+				output.setItemDamage(CustomPotionHelper.metadataTable[potion.getId() - 1][0]);
 			}
 			potion.writeNBTTag(tag);
 		}else if(mode == MODE.DURATION){
 			potion.incrementDurationCode();
 			if(ItemPotion.isSplash(input.getItemDamage())){
-				output.setItemDamage(CustomPotionHelper.metadataTable[potion.getId() - 1][1]);
-			}else{
 				output.setItemDamage(CustomPotionHelper.metadataTable[potion.getId() - 1][2]);
+			}else{
+				output.setItemDamage(CustomPotionHelper.metadataTable[potion.getId() - 1][1]);
 			}
 			potion.writeNBTTag(tag);
 		}else if(mode == MODE.SPLASH){

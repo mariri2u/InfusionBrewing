@@ -1,10 +1,27 @@
 package mariri.infusionbrewing;
 
+import java.util.ArrayList;
+
+import mariri.infusionbrewing.block.BlockFluidPotion;
+import mariri.infusionbrewing.block.MaterialPotion;
+import mariri.infusionbrewing.handler.BehaviorDispencePotionBucket;
+import mariri.infusionbrewing.handler.BehaviorDispenseMagicBucket;
+import mariri.infusionbrewing.handler.BehaviorDispenseMagicGlass;
+import mariri.infusionbrewing.handler.FillBucketHandler;
+import mariri.infusionbrewing.item.ItemMagicBottle;
+import mariri.infusionbrewing.item.ItemMagicBucket;
+import mariri.infusionbrewing.item.ItemPotionBaubles;
+import mariri.infusionbrewing.item.ItemPotionBucket;
+import mariri.infusionbrewing.item.ItemPotionFocus;
+import mariri.infusionbrewing.misc.CustomPotionHelper;
+import mariri.infusionbrewing.misc.InfusionBrewingRecipe;
+import net.minecraft.block.BlockDispenser;
 import net.minecraft.block.material.Material;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.crafting.ShapelessRecipes;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
@@ -17,6 +34,7 @@ import thaumcraft.api.aspects.Aspect;
 import thaumcraft.api.aspects.AspectList;
 import thaumcraft.api.crafting.CrucibleRecipe;
 import thaumcraft.api.crafting.InfusionRecipe;
+import thaumcraft.api.crafting.ShapelessArcaneRecipe;
 import thaumcraft.api.research.ResearchCategories;
 import thaumcraft.api.research.ResearchItem;
 import thaumcraft.api.research.ResearchPage;
@@ -31,23 +49,22 @@ import cpw.mods.fml.common.registry.GameRegistry;
 @Mod(modid = InfusionBrewing.MODID, version = InfusionBrewing.VERSION, dependencies = InfusionBrewing.DEPENDENCIES )
 public class InfusionBrewing {
     public static final String MODID = "InfusionBrewing";
-    public static final String VERSION = "1.7.2-0.1";
+    public static final String VERSION = "1.7.2-1.0";
     public static final String DEPENDENCIES = "required-after:Thaumcraft";
 //    public static final String DEPENDENCIES = "";
     
     public static BlockFluidPotion[] blockFluidPotions;
     public static Fluid[] fluidPotions;
     public static ItemPotionBucket[] itemPotionBuckets;
+    public static ItemMagicBucket itemMagicBucket;
 //    public static BlockPotionCauldron blockPotionCauldron;
-    public static ItemInfusedGlassBottle itemInfusedGlassBottle;
+    public static ItemMagicBottle itemMagicBottle;
     public static ItemPotionFocus itemPotionFocus;
     public static int POTION_COUNT = 23;
     
     public static CreativeTabs creativeTab;
     
     public static Material potionMaterial;
-    
-    public static final int INSTABILITY = 5;
     
     public static final String RESEARCH_CATEGORY = "INFUSION_BREWING";
     
@@ -59,7 +76,8 @@ public class InfusionBrewing {
     public static final String RESEARCH_AMPLIFIER = "AMPLIFIER";
     public static final String RESEARCH_DURATION = "DURATION";
     
-    public static final String RESEARCH_GLASS_BOTTLE = "INFUSED_BOTTLE";
+    public static final String RESEARCH_MAGIC_BOTTLE = "MAGIC_BOTTLE";
+    public static final String RESEARCH_MAGIC_BUCKET = "MAGIC_BUCKET";
     
 //    public static final String RESEARCH_BAUBLES = "Baubles";
     
@@ -73,7 +91,10 @@ public class InfusionBrewing {
     
     public static boolean ENABLE_REACT_EXPLOSION;
     public static boolean ENABLE_REACT_SPAWN;
-    
+    public static boolean ENABLE_INFINITY_SOURCE;
+    public static boolean DISPENSE_MAGIC_BUCKET;
+    public static int POTION_STACK_SIZE;
+   
     public static ItemPotionBaubles[] itemPotionBaubles;
     
     @EventHandler
@@ -83,20 +104,24 @@ public class InfusionBrewing {
         
         ENABLE_REACT_EXPLOSION = config.get(Configuration.CATEGORY_GENERAL, "enableReactExplosion", true).getBoolean(true);
         ENABLE_REACT_SPAWN = config.get(Configuration.CATEGORY_GENERAL, "enableReactSpawn", true).getBoolean(true);
+        ENABLE_INFINITY_SOURCE = config.get(Configuration.CATEGORY_GENERAL, "enableInfinitySource", true).getBoolean(true); 
+        DISPENSE_MAGIC_BUCKET = config.get(Configuration.CATEGORY_GENERAL, "dispenseMagicBucket", false).getBoolean(false); 
+        POTION_STACK_SIZE = config.get(Configuration.CATEGORY_GENERAL, "potionStackSize", 8).getInt(); 
       
         config.save();
     }
     
     @EventHandler
     public void init(FMLInitializationEvent event){
-    	Items.potionitem.setMaxStackSize(8);
+    	Items.potionitem.setMaxStackSize(POTION_STACK_SIZE);
     	
     	creativeTab = new CreativeTabBrewing("Infusion Brewing");
     	
-    	itemInfusedGlassBottle = 
-    			(ItemInfusedGlassBottle)new ItemInfusedGlassBottle()
-    			.setCreativeTab(creativeTab).setUnlocalizedName("infusedGlassBottle");
-    	GameRegistry.registerItem(itemInfusedGlassBottle, "infusedGlassBottle");
+    	itemMagicBottle = 
+    			(ItemMagicBottle)new ItemMagicBottle()
+    			.setMaxStackSize(POTION_STACK_SIZE)
+    			.setCreativeTab(creativeTab).setUnlocalizedName("magicBottle");
+    	GameRegistry.registerItem(itemMagicBottle, "magicBottle");
     	
 
         potionMaterial = new MaterialPotion();
@@ -113,12 +138,12 @@ public class InfusionBrewing {
         			.setPotionEffect(i + 1)
         			.setExplode(ENABLE_REACT_EXPLOSION)
         			.setSpawn(ENABLE_REACT_SPAWN)
+        			.setInfinity(ENABLE_INFINITY_SOURCE)
         			.setBlockName("fluidPotion" + i);
         	GameRegistry.registerBlock(blockFluidPotions[i], "fluidPotion" + i);
         	
         	itemPotionBuckets[i] =
         			(ItemPotionBucket)new ItemPotionBucket(blockFluidPotions[i])
-        			.setPotionEffect(i + 1)
         			.setCreativeTab(creativeTab)
         			.setUnlocalizedName("potionBucket" + i)
         			.setContainerItem(Items.bucket);
@@ -127,7 +152,13 @@ public class InfusionBrewing {
         	FillBucketHandler.INSTANCE.buckets.put(blockFluidPotions[i], itemPotionBuckets[i]);
         	FluidContainerRegistry.registerFluidContainer(fluidPotions[i], new ItemStack(Items.bucket));
         }
-        
+    	itemMagicBucket =
+    			(ItemMagicBucket)new ItemMagicBucket(Blocks.air)
+    			.setCreativeTab(creativeTab)
+    			.setMaxStackSize(1)
+    			.setUnlocalizedName("magicBucket");
+        GameRegistry.registerItem(itemMagicBucket, "magicBucket");
+   
         itemPotionFocus = 
         		(ItemPotionFocus)new ItemPotionFocus()
         		.setCreativeTab(creativeTab)
@@ -164,27 +195,53 @@ public class InfusionBrewing {
     	ResearchPage[] pages;
     	InfusionRecipe iRecipe;
     	CrucibleRecipe cRecipe;
+    	ShapelessArcaneRecipe aRecipe;
+    	ArrayList<ItemStack> input;
+    	ShapelessRecipes wRecipe;
     	
     	research = new ResearchItem(
-    			RESEARCH_GLASS_BOTTLE, RESEARCH_CATEGORY,
+    			RESEARCH_MAGIC_BOTTLE, RESEARCH_CATEGORY,
     			new AspectList().add(Aspect.CRYSTAL, 1).add(Aspect.MAGIC, 1),
-    			0, 0, 0, new ItemStack(itemInfusedGlassBottle)
+    			0, 0, 0, new ItemStack(itemMagicBottle)
     			).setStub().setAutoUnlock().setRound().registerResearchItem();
     	pages = new ResearchPage[2];
-    	pages[0] = new ResearchPage("tc.research_page." + RESEARCH_GLASS_BOTTLE + ".0");
+    	pages[0] = new ResearchPage("tc.research_page." + RESEARCH_MAGIC_BOTTLE + ".0");
     	research.setPages(pages);
     	cRecipe = ThaumcraftApi.addCrucibleRecipe(
-    			RESEARCH_GLASS_BOTTLE,
-    			new ItemStack(itemInfusedGlassBottle),
+    			RESEARCH_MAGIC_BOTTLE,
+    			new ItemStack(itemMagicBottle),
     			new ItemStack(Items.glass_bottle),
     			new AspectList().add(Aspect.CRYSTAL, 2).add(Aspect.MAGIC, 1));
     	pages[1] = new ResearchPage(cRecipe);
     	
     	research = new ResearchItem(
+    			RESEARCH_MAGIC_BUCKET, RESEARCH_CATEGORY,
+    			new AspectList().add(Aspect.CRYSTAL, 1).add(Aspect.MAGIC, 1),
+    			0, 2, 0, new ItemStack(itemMagicBucket)
+    			).setStub().setAutoUnlock().setRound().registerResearchItem();
+    	pages = new ResearchPage[3];
+    	pages[0] = new ResearchPage("tc.research_page." + RESEARCH_MAGIC_BUCKET + ".0");
+    	research.setPages(pages);
+    	aRecipe = ThaumcraftApi.addShapelessArcaneCraftingRecipe(
+    			RESEARCH_MAGIC_BUCKET,
+    			new ItemStack(itemMagicBucket),
+    			new AspectList().add(Aspect.WATER, 1),
+    			new Object[]{ new ItemStack(Items.bucket) });
+    	pages[1] = new ResearchPage(aRecipe);
+    	input = new ArrayList<ItemStack>();
+    	input.add(new ItemStack(itemMagicBucket));
+    	wRecipe = new ShapelessRecipes(new ItemStack(Items.bucket), input);
+    	GameRegistry.addRecipe(wRecipe);
+    	pages[2] = new ResearchPage(wRecipe);
+//    	GameRegistry.addShapelessRecipe(
+//    			new ItemStack(Items.bucket),
+//    			new Object[]{ new ItemStack(itemMagicBucket) });
+    	
+    	research = new ResearchItem(
     			RESEARCH_FLUID_POTION, RESEARCH_CATEGORY,
     			new AspectList().add(Aspect.MAGIC, 1).add(Aspect.ORDER, 1).add(Aspect.ENTROPY, 1),
     			2, 0, 1, new ItemStack(itemPotionBuckets[0])
-    			).setStub().setParents(new String[]{"INFUSION", RESEARCH_GLASS_BOTTLE}).setRound().registerResearchItem();
+    			).setStub().setParents(new String[]{"INFUSION", RESEARCH_MAGIC_BOTTLE}).setRound().registerResearchItem();
     	pages = new ResearchPage[POTION_COUNT + 1];
     	pages[0] = new ResearchPage("tc.research_page." + RESEARCH_FLUID_POTION + ".0");
     	research.setPages(pages);
@@ -192,7 +249,7 @@ public class InfusionBrewing {
         	iRecipe = ThaumcraftApi.addInfusionCraftingRecipe(
         			RESEARCH_FLUID_POTION, 
         			new ItemStack(itemPotionBuckets[i]),
-        			INSTABILITY, 
+        			5, 
         			inputAspects[i],
         			new ItemStack(Items.water_bucket),
         			inputItems[i]);
@@ -367,6 +424,15 @@ public class InfusionBrewing {
     	pages[1] = new ResearchPage(iRecipe);
 
     	MinecraftForge.EVENT_BUS.register(FillBucketHandler.INSTANCE);
+		BlockDispenser.dispenseBehaviorRegistry.putObject(itemMagicBottle, BehaviorDispenseMagicGlass.INSTANCE);
+		BlockDispenser.dispenseBehaviorRegistry.putObject(itemMagicBucket, BehaviorDispenseMagicBucket.INSTANCE);
+		if(!DISPENSE_MAGIC_BUCKET){
+			BlockDispenser.dispenseBehaviorRegistry.putObject(Items.bucket, BehaviorDispenseMagicBucket.INSTANCE);
+		}
+		BehaviorDispencePotionBucket.DISPENSE_MAGIC_BUCKET = DISPENSE_MAGIC_BUCKET;
+		for(int i = 0; i < POTION_COUNT; i++){
+    		BlockDispenser.dispenseBehaviorRegistry.putObject(itemPotionBuckets[i], BehaviorDispencePotionBucket.INSTANCE);
+    	}
     }
     
     private final ItemStack[][] inputItems = new ItemStack[][]{

@@ -1,7 +1,9 @@
-package mariri.infusionbrewing;
+package mariri.infusionbrewing.item;
 
 import java.util.List;
 
+import mariri.infusionbrewing.block.BlockFluidPotion;
+import mariri.infusionbrewing.misc.CustomPotionHelper;
 import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemBucket;
@@ -15,21 +17,14 @@ public class ItemPotionBucket extends ItemBucket {
 
 	private String iconName;
 	private BlockFluidPotion fluid;
-
-	protected int potionEffect;
 //	public List<BlockFluidPotion> fluids = new ArrayList<BlockFluidPotion>();
 	public ItemPotionBucket(BlockFluidPotion block){
 		super(block);
 		fluid = block;
 	}
 	
-	public ItemPotionBucket setPotionEffect(int potionEffect){
-		this.potionEffect = potionEffect;
-		return this;
-	}
-	
 	public int getPotionEffect(){
-		return potionEffect;
+		return fluid.getPotionEffect();
 	}
 	
 //	@Override
@@ -48,7 +43,7 @@ public class ItemPotionBucket extends ItemBucket {
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void registerIcons(IIconRegister par1IconRegister) {
-		this.itemIcon = par1IconRegister.registerIcon("mariri:bucket_potion" + potionEffect);
+		this.itemIcon = par1IconRegister.registerIcon("mariri:bucket_potion" + fluid.getPotionEffect());
 	}
 	
 	@Override
@@ -56,7 +51,7 @@ public class ItemPotionBucket extends ItemBucket {
 		if(fluid instanceof BlockFluidPotion){
 			String name = StatCollector.translateToLocal(Potion.potionTypes[fluid.getPotionEffect()].getName());
 			tooltip.add(name);
-			tooltip.add(CustomPotionHelper.isSupport(potionEffect) ? " - Good Status" : " - Bad Status");
+			tooltip.add(CustomPotionHelper.isSupport(fluid.getPotionEffect()) ? " - Good Status" : " - Bad Status");
 		}
 	}
 }

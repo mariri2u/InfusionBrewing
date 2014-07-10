@@ -1,7 +1,8 @@
-package mariri.infusionbrewing;
+package mariri.infusionbrewing.item;
 
 import java.util.List;
 
+import mariri.infusionbrewing.misc.CustomPotionHelper;
 import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;

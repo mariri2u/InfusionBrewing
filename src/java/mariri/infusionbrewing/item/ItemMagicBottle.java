@@ -1,5 +1,7 @@
-package mariri.infusionbrewing;
+package mariri.infusionbrewing.item;
 
+import mariri.infusionbrewing.block.BlockFluidPotion;
+import mariri.infusionbrewing.misc.CustomPotionHelper;
 import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
@@ -9,10 +11,9 @@ import net.minecraft.world.World;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
-public class ItemInfusedGlassBottle extends Item {
+public class ItemMagicBottle extends Item {
 	
-	public ItemInfusedGlassBottle(){
-		
+	public ItemMagicBottle(){
 	}
 
     public ItemStack onItemRightClick(ItemStack itemStack, World world, EntityPlayer player)
@@ -65,6 +66,6 @@ public class ItemInfusedGlassBottle extends Item {
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void registerIcons(IIconRegister iconregister) {
-		this.itemIcon = iconregister.registerIcon("mariri:infused_glass_bottle");
+		this.itemIcon = iconregister.registerIcon("mariri:magic_bottle");
 	}
 }

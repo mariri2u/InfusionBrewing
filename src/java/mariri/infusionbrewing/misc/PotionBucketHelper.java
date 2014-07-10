@@ -1,4 +1,4 @@
-package mariri.infusionbrewing;
+package mariri.infusionbrewing.misc;
 
 import net.minecraft.potion.PotionEffect;
 
