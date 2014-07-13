@@ -49,7 +49,7 @@ import cpw.mods.fml.common.registry.GameRegistry;
 @Mod(modid = InfusionBrewing.MODID, version = InfusionBrewing.VERSION, dependencies = InfusionBrewing.DEPENDENCIES )
 public class InfusionBrewing {
     public static final String MODID = "InfusionBrewing";
-    public static final String VERSION = "1.7.2-1.0";
+    public static final String VERSION = "1.7.2-1.0a";
     public static final String DEPENDENCIES = "required-after:Thaumcraft";
 //    public static final String DEPENDENCIES = "";
     
@@ -150,7 +150,7 @@ public class InfusionBrewing {
         	GameRegistry.registerItem(itemPotionBuckets[i], "potionBucket" + i);
         	
         	FillBucketHandler.INSTANCE.buckets.put(blockFluidPotions[i], itemPotionBuckets[i]);
-        	FluidContainerRegistry.registerFluidContainer(fluidPotions[i], new ItemStack(Items.bucket));
+        	FluidContainerRegistry.registerFluidContainer(fluidPotions[i], new ItemStack(itemPotionBuckets[i]), FluidContainerRegistry.EMPTY_BUCKET);
         }
     	itemMagicBucket =
     			(ItemMagicBucket)new ItemMagicBucket(Blocks.air)

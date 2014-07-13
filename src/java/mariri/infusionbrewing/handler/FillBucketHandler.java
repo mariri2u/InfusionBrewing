@@ -22,7 +22,8 @@ public class FillBucketHandler {
 	public void onFillBucket(FillBucketEvent e){
         Block block = e.world.getBlock(e.target.blockX, e.target.blockY, e.target.blockZ);
         Item bucket = buckets.get(block);
-        if(bucket != null && e.world.getBlockMetadata(e.target.blockX, e.target.blockY, e.target.blockZ) == 0){
+        
+        if(	bucket != null && e.world.getBlockMetadata(e.target.blockX, e.target.blockY, e.target.blockZ) == 0){
             e.world.setBlockToAir(e.target.blockX, e.target.blockY, e.target.blockZ);
             e.result = new ItemStack(bucket);
             e.setResult(Result.ALLOW);
