@@ -3,6 +3,7 @@ package mariri.infusionbrewing;
 import java.util.ArrayList;
 
 import mariri.infusionbrewing.block.BlockFluidPotion;
+import mariri.infusionbrewing.block.BlockSemiSolidPotion;
 import mariri.infusionbrewing.block.MaterialPotion;
 import mariri.infusionbrewing.handler.BehaviorDispencePotionBucket;
 import mariri.infusionbrewing.handler.BehaviorDispenseMagicBucket;
@@ -49,11 +50,12 @@ import cpw.mods.fml.common.registry.GameRegistry;
 @Mod(modid = InfusionBrewing.MODID, version = InfusionBrewing.VERSION, dependencies = InfusionBrewing.DEPENDENCIES )
 public class InfusionBrewing {
     public static final String MODID = "InfusionBrewing";
-    public static final String VERSION = "1.7.2-1.0a";
+    public static final String VERSION = "1.7.10-1.1";
     public static final String DEPENDENCIES = "required-after:Thaumcraft";
-//    public static final String DEPENDENCIES = "";
+//    public static final String DEPENDENCIES = "after:Thaumcraft";
     
     public static BlockFluidPotion[] blockFluidPotions;
+    public static BlockSemiSolidPotion blockSemiSolidPotion;
     public static Fluid[] fluidPotions;
     public static ItemPotionBucket[] itemPotionBuckets;
     public static ItemMagicBucket itemMagicBucket;
@@ -128,6 +130,12 @@ public class InfusionBrewing {
         fluidPotions = new Fluid[POTION_COUNT];
         blockFluidPotions = new BlockFluidPotion[POTION_COUNT];
         itemPotionBuckets = new ItemPotionBucket[POTION_COUNT];
+        
+        blockSemiSolidPotion = 
+        		(BlockSemiSolidPotion)new BlockSemiSolidPotion()
+        		.setCreativeTab(creativeTab)
+        		.setBlockName("semiSolidPotion");
+        GameRegistry.registerBlock(blockSemiSolidPotion, "semiSolidPotion");
     	
         for(int i = 0; i < POTION_COUNT; i++){
         	fluidPotions[i] = new Fluid("potion" + i).setDensity(800).setViscosity(1000);

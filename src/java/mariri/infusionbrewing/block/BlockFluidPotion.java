@@ -2,6 +2,7 @@ package mariri.infusionbrewing.block;
 
 import java.util.Random;
 
+import mariri.infusionbrewing.InfusionBrewing;
 import mariri.infusionbrewing.misc.CustomPotionHelper;
 import mariri.infusionbrewing.misc.SpawnHelper;
 import net.minecraft.block.Block;
@@ -254,6 +255,8 @@ public class BlockFluidPotion extends BlockFluidClassic {
     		if(support){
             	createExplosion(world, x, y, z);
     		}
+    	}else if(infusion == Blocks.ice){
+   			world.setBlock(x, y, z, InfusionBrewing.blockSemiSolidPotion);
     	}
     }
     

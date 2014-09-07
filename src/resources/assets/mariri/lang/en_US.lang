@@ -1,6 +1,7 @@
 #
 item.magicBottle.name=Magic Bottle
 item.magicBucket.name=Magic Bucket
+tile.semiSolidPotion.name=Semi Solid Potion
 item.potionInfusedAmulet.name=Potion Infused Amulet
 item.potionInfusedBelt.name=Potion Infused Belt
 item.potionInfusedRing.name=Potion Infused Ring
