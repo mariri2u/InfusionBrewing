@@ -2,6 +2,14 @@
 item.magicBottle.name=Magic Bottle
 item.magicBucket.name=Magic Bucket
 tile.semiSolidPotion.name=Semi Solid Potion
+item.upgradePowerI.name=Spawner Upgrade: Power I
+item.upgradePowerII.name=Spawner Upgrade: Power II
+item.upgradePowerIII.name=Spawner Upgrade: Power III
+item.upgradePowerIV.name=Spawner Upgrade: Power IV
+item.upgradeSpeedI.name=Spawner Upgrade: Speed I
+item.upgradeSpeedII.name=Spawner Upgrade: Speed II
+item.upgradeSpeedIII.name=Spawner Upgrade: Speed III
+item.upgradeSpeedIV.name=Spawner Upgrade: Speed IV
 item.potionInfusedAmulet.name=Potion Infused Amulet
 item.potionInfusedBelt.name=Potion Infused Belt
 item.potionInfusedRing.name=Potion Infused Ring
@@ -84,4 +92,9 @@ tc.research_page.POTION_RING.0=指輪にポーションの力を込めます<BR>
 tc.research_name.POTION_BELT=Potion Infused Accessory
 tc.research_text.POTION_BELT=[IB] Belt
 tc.research_page.POTION_BELT.0=ベルトにポーションの力を込めます<BR>装備するとVisを消費してポーション効果を得ることができます<BR>効果時間を16分まで延長したポーションを素材に使用できます<BR>ステータス効果とレベルは任意のものを使用できます
-
+tc.research_name.SPAWNER_POWER=Spawner Upgrade: Power
+tc.research_text.SPAWNER_POWER=[IB] Monster spawner too many mobs!
+tc.research_page.SPAWNER_POWER.0=モンスタースポナーに右クリックで使用することで強化できます。<BR>4段階まで強化することができ、1回に沸くモンスター数を増加させます。沸き制限となるモンスター数も緩和されます。<BR>杖を持ってスポナーをシフト右クリックすることで強化状況を確認できます。
+tc.research_name.SPAWNER_SPEED=Spawner Upgrade: Speed
+tc.research_text.SPAWNER_SPEED=[IB] Monster spawner too less interval!
+tc.research_page.SPAWNER_SPEED.0=モンスタースポナーに右クリックで使用することで強化できます。<BR>4段階まで強化することができ、モンスターの沸く間隔を短くできます。<BR>杖を持ってスポナーをシフト右クリックすることで強化状況を確認できます。

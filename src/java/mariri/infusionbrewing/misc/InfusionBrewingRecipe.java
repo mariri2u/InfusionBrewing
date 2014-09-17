@@ -14,7 +14,7 @@ import thaumcraft.api.crafting.InfusionRecipe;
 
 public class InfusionBrewingRecipe extends InfusionRecipe {
 	
-	public enum MODE { AMPLIFIER, DURATION, SPLASH, BAUBLES, FOCUS };
+	public enum MODE { AMPLIFIER, DURATION, SPLASH, BAUBLES, FOCUS, UPGRADE };
 	
 	private MODE mode = MODE.AMPLIFIER;
 	
@@ -109,6 +109,15 @@ public class InfusionBrewingRecipe extends InfusionRecipe {
 		if(stack0.getItem() != Items.potionitem){
 			t1 &= stack0.getItemDamage() == stack1.getItemDamage();
 		}
+		
+		if(mode == MODE.UPGRADE && stack0.getItem() == Items.potionitem && stack1.getItem() == Items.potionitem){
+			CustomPotionHelper p0 = CustomPotionHelper.getInstanceFromNBTTag(CustomPotionHelper.findPotionNBT(stack0));
+			CustomPotionHelper p1 = CustomPotionHelper.getInstanceFromNBTTag(CustomPotionHelper.findPotionNBT(stack1));
+			t1 &= p0.getId() == p1.getId();
+			t1 &= p0.getAmplifier() == p1.getAmplifier();
+//			t1 &= p0.getDuration() == p1.getDuration();
+//			t1 &= ItemPotion.isSplash(stack0.getItemDamage()) == ItemPotion.isSplash(stack1.getItemDamage());
+		}
 
         return t1;
     }
@@ -127,7 +136,7 @@ public class InfusionBrewingRecipe extends InfusionRecipe {
 			}else{
 				output.setItemDamage(CustomPotionHelper.metadataTable[potion.getId() - 1][0]);
 			}
-			potion.writeNBTTag(tag);
+			potion.writeToNBTTag(tag);
 		}else if(mode == MODE.DURATION){
 			potion.incrementDurationCode();
 			if(ItemPotion.isSplash(input.getItemDamage())){
@@ -135,7 +144,7 @@ public class InfusionBrewingRecipe extends InfusionRecipe {
 			}else{
 				output.setItemDamage(CustomPotionHelper.metadataTable[potion.getId() - 1][1]);
 			}
-			potion.writeNBTTag(tag);
+			potion.writeToNBTTag(tag);
 		}else if(mode == MODE.SPLASH){
 			output.setItemDamage(CustomPotionHelper.metadataTable[potion.getId() - 1][2]);
 		}else if(mode == MODE.BAUBLES || mode == MODE.FOCUS){

@@ -50,6 +50,8 @@ public class CustomPotionHelper {
 	public static final int ABSORPTION = 22;
 	public static final int SATURATION = 23;
 	
+	public static final int EFFECT_VALUE = 23;
+	
 	public CustomPotionHelper(){
 		id = 1;
 		duration = this.isInstant() ? INSTANT_DURATION : DURATION_TABLE[0];
@@ -163,7 +165,7 @@ public class CustomPotionHelper {
 		return this.setDuration(DURATION_TABLE[code]);
 	}
 	
-	public void writeNBTTag(NBTTagCompound tag){
+	public void writeToNBTTag(NBTTagCompound tag){
 		tag.setByte("Id", (byte)id);
 		tag.setByte("Amplifier", (byte)amplifier);
 		tag.setInteger("Duration", duration);
@@ -193,7 +195,7 @@ public class CustomPotionHelper {
 		try{
 			return itemstack.getTagCompound().getTagList("CustomPotionEffects", Constants.NBT.TAG_COMPOUND).getCompoundTagAt(0);
 		}catch(NullPointerException e){
-			return null;
+			return new NBTTagCompound();
 		}
 	}
 	
@@ -201,7 +203,7 @@ public class CustomPotionHelper {
 		try{
 			return tag.getTagList("CustomPotionEffects", Constants.NBT.TAG_COMPOUND).getCompoundTagAt(0);
 		}catch(NullPointerException e){
-			return null;
+			return new NBTTagCompound();
 		}
 	}
 	
@@ -213,7 +215,7 @@ public class CustomPotionHelper {
 		ItemStack itemstack = new ItemStack(Items.potionitem);
 		CustomPotionHelper potion = new CustomPotionHelper(id, DURATION_TABLE[durationCode], amplifier);
 		itemstack.setTagCompound(createVoidNBTTag());
-		potion.writeNBTTag(findPotionNBT(itemstack));
+		potion.writeToNBTTag(findPotionNBT(itemstack));
 		itemstack.setItemDamage(metadataTable[id - 1][splash ? 2 : 0]);
 		return itemstack;
 	}

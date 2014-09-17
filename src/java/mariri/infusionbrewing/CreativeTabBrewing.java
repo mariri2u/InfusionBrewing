@@ -16,7 +16,7 @@ public class CreativeTabBrewing extends CreativeTabs {
 	@SideOnly(Side.CLIENT)
 	public Item getTabIconItem()
 	{
-		return InfusionBrewing.itemPotionBuckets[0];
+		return InfusionBrewing.itemMagicBottle;
 	}
  
 	@Override

@@ -9,13 +9,16 @@ import mariri.infusionbrewing.handler.BehaviorDispencePotionBucket;
 import mariri.infusionbrewing.handler.BehaviorDispenseMagicBucket;
 import mariri.infusionbrewing.handler.BehaviorDispenseMagicGlass;
 import mariri.infusionbrewing.handler.FillBucketHandler;
+import mariri.infusionbrewing.handler.PlayerClickHandler;
 import mariri.infusionbrewing.item.ItemMagicBottle;
 import mariri.infusionbrewing.item.ItemMagicBucket;
 import mariri.infusionbrewing.item.ItemPotionBaubles;
 import mariri.infusionbrewing.item.ItemPotionBucket;
 import mariri.infusionbrewing.item.ItemPotionFocus;
+import mariri.infusionbrewing.item.ItemSpawnerUpgrade;
 import mariri.infusionbrewing.misc.CustomPotionHelper;
 import mariri.infusionbrewing.misc.InfusionBrewingRecipe;
+import mariri.infusionbrewing.misc.ResearchHelper;
 import net.minecraft.block.BlockDispenser;
 import net.minecraft.block.material.Material;
 import net.minecraft.creativetab.CreativeTabs;
@@ -50,9 +53,9 @@ import cpw.mods.fml.common.registry.GameRegistry;
 @Mod(modid = InfusionBrewing.MODID, version = InfusionBrewing.VERSION, dependencies = InfusionBrewing.DEPENDENCIES )
 public class InfusionBrewing {
     public static final String MODID = "InfusionBrewing";
-    public static final String VERSION = "1.7.10-1.1";
-    public static final String DEPENDENCIES = "required-after:Thaumcraft";
-//    public static final String DEPENDENCIES = "after:Thaumcraft";
+    public static final String VERSION = "1.7.10-1.2-dev2";
+//    public static final String DEPENDENCIES = "required-after:Thaumcraft";
+    public static final String DEPENDENCIES = "after:Thaumcraft";
     
     public static BlockFluidPotion[] blockFluidPotions;
     public static BlockSemiSolidPotion blockSemiSolidPotion;
@@ -62,6 +65,7 @@ public class InfusionBrewing {
 //    public static BlockPotionCauldron blockPotionCauldron;
     public static ItemMagicBottle itemMagicBottle;
     public static ItemPotionFocus itemPotionFocus;
+    public static ItemSpawnerUpgrade itemSpawnerUpgrade;
     public static int POTION_COUNT = 23;
     
     public static CreativeTabs creativeTab;
@@ -88,6 +92,9 @@ public class InfusionBrewing {
     public static final String RESEARCH_BELT = "POTION_BELT";
     
     public static final String RESEARCH_FOCUS = "POTION_FOCUS";
+    
+    public static final String RESEARCH_SPAWNER_POWER = "SPAWNER_POWER";
+    public static final String RESEARCH_SPAWNER_SPEED = "SPAWNER_SPEED";
     
 //    public static final String INFUSION_BREWING_RESEARCH = "Brewing";
     
@@ -131,12 +138,18 @@ public class InfusionBrewing {
         blockFluidPotions = new BlockFluidPotion[POTION_COUNT];
         itemPotionBuckets = new ItemPotionBucket[POTION_COUNT];
         
+        itemSpawnerUpgrade = 
+        		(ItemSpawnerUpgrade)new ItemSpawnerUpgrade()
+        		.setMaxStackSize(1)
+        		.setCreativeTab(creativeTab).setUnlocalizedName("spawnerUpgrade");
+        GameRegistry.registerItem(itemSpawnerUpgrade, "spawnerUpgrade");
+        
         blockSemiSolidPotion = 
         		(BlockSemiSolidPotion)new BlockSemiSolidPotion()
         		.setCreativeTab(creativeTab)
         		.setBlockName("semiSolidPotion");
         GameRegistry.registerBlock(blockSemiSolidPotion, "semiSolidPotion");
-    	
+          	
         for(int i = 0; i < POTION_COUNT; i++){
         	fluidPotions[i] = new Fluid("potion" + i).setDensity(800).setViscosity(1000);
         	FluidRegistry.registerFluid(fluidPotions[i]);
@@ -196,8 +209,26 @@ public class InfusionBrewing {
     
     @EventHandler
     public void postInit(FMLPostInitializationEvent event){
+    	initResearch();
+
+    	MinecraftForge.EVENT_BUS.register(FillBucketHandler.INSTANCE);
+		BlockDispenser.dispenseBehaviorRegistry.putObject(itemMagicBottle, BehaviorDispenseMagicGlass.INSTANCE);
+		BlockDispenser.dispenseBehaviorRegistry.putObject(itemMagicBucket, BehaviorDispenseMagicBucket.INSTANCE);
+		if(!DISPENSE_MAGIC_BUCKET){
+			BlockDispenser.dispenseBehaviorRegistry.putObject(Items.bucket, BehaviorDispenseMagicBucket.INSTANCE);
+		}
+		BehaviorDispencePotionBucket.DISPENSE_MAGIC_BUCKET = DISPENSE_MAGIC_BUCKET;
+		for(int i = 0; i < POTION_COUNT; i++){
+    		BlockDispenser.dispenseBehaviorRegistry.putObject(itemPotionBuckets[i], BehaviorDispencePotionBucket.INSTANCE);
+    	}
+		
+		MinecraftForge.EVENT_BUS.register(new PlayerClickHandler());
+//		MinecraftForge.EVENT_BUS.register(new AttackEntityHandler());
+    }
+    
+    private void initResearch(){
 		ResourceLocation background = new ResourceLocation("thaumcraft", "textures/gui/gui_researchback.png");
-		ResourceLocation icon = new ResourceLocation("mariri", "textures/items/bucket_potion1.png");
+		ResourceLocation icon = new ResourceLocation("mariri", "textures/items/magic_bottle.png");
 		ResearchCategories.registerCategory(RESEARCH_CATEGORY, icon, background);
     	ResearchItem research;
     	ResearchPage[] pages;
@@ -206,6 +237,8 @@ public class InfusionBrewing {
     	ShapelessArcaneRecipe aRecipe;
     	ArrayList<ItemStack> input;
     	ShapelessRecipes wRecipe;
+    	
+    	// Magic Item
     	
     	research = new ResearchItem(
     			RESEARCH_MAGIC_BOTTLE, RESEARCH_CATEGORY,
@@ -245,6 +278,8 @@ public class InfusionBrewing {
 //    			new ItemStack(Items.bucket),
 //    			new Object[]{ new ItemStack(itemMagicBucket) });
     	
+    	// Fluid Potion
+    	
     	research = new ResearchItem(
     			RESEARCH_FLUID_POTION, RESEARCH_CATEGORY,
     			new AspectList().add(Aspect.MAGIC, 1).add(Aspect.ORDER, 1).add(Aspect.ENTROPY, 1),
@@ -263,6 +298,8 @@ public class InfusionBrewing {
         			inputItems[i]);
         	pages[i + 1] = new ResearchPage(iRecipe);
         }
+        
+        // Brewing
 
     	research = new ResearchItem(
     			RESEARCH_DURATION, RESEARCH_CATEGORY,
@@ -327,35 +364,11 @@ public class InfusionBrewing {
     	ThaumcraftApi.getCraftingRecipes().add(iRecipe);
     	pages[1] = new ResearchPage(iRecipe);
     	
-    	research = new ResearchItem(
-    			RESEARCH_FOCUS, RESEARCH_CATEGORY,
-    			new AspectList().add(Aspect.FIRE, 1).add(Aspect.ENERGY, 1).add(Aspect.ENTROPY, 1),
-    			6, 0, 2, new ItemStack(itemPotionFocus)
-    			).setStub().setParents(new String[]{RESEARCH_DURATION, RESEARCH_SPLASH, "NITOR", "ALUMENTUM"})
-    			.setRound().registerResearchItem();
-    	pages = new ResearchPage[2];
-    	pages[0] = new ResearchPage("tc.research_page." + RESEARCH_FOCUS + ".0");
-    	research.setPages(pages);
-    	iRecipe = new InfusionBrewingRecipe(
-    			RESEARCH_FOCUS,
-    			new ItemStack(itemPotionFocus),
-    			8,
-    			new AspectList().add(Aspect.FIRE, 24).add(Aspect.MAGIC, 16).add(Aspect.ENERGY, 32).add(Aspect.ENTROPY, 24),
-//    			new ItemStack(Items.potionitem, 1, CustomPotionHelper.metadataTable[0][3]),
-    			CustomPotionHelper.getSampleItem(1, CustomPotionHelper.getMaxDuration(), 0, true),
-    			new ItemStack[]{
-    				ItemApi.getItem("itemShard", 1), // Fire Shard
-    				ItemApi.getItem("itemResource", 0), // Almentum
-    				ItemApi.getItem("itemResource", 1), // Nitor
-    				ItemApi.getItem("itemResource", 15), // Primal Charm
-    			})
-    			.setMode(InfusionBrewingRecipe.MODE.FOCUS);
-    	ThaumcraftApi.getCraftingRecipes().add(iRecipe);
-    	pages[1] = new ResearchPage(iRecipe);
+    	// Baubles
     	
     	research = new ResearchItem(
     			RESEARCH_AMULET, RESEARCH_CATEGORY,
-    			new AspectList().add(Aspect.AIR, 1).add(Aspect.CRYSTAL, 1).add(Aspect.SENSES, 1),
+    			new AspectList().add(Aspect.AIR, 1).add(Aspect.ARMOR, 1).add(Aspect.SENSES, 1),
     			2, -4, 2, new ItemStack(itemPotionBaubles[0])
     			).setStub().setParents(new String[]{RESEARCH_DURATION, "ENCHFABRIC", "TALLOW"})
     			.setRound().registerResearchItem();
@@ -366,7 +379,7 @@ public class InfusionBrewing {
     			RESEARCH_AMULET,
     			new ItemStack(itemPotionBaubles[0]),
     			8,
-    			new AspectList().add(Aspect.AIR, 32).add(Aspect.MAGIC, 16).add(Aspect.CRYSTAL, 16).add(Aspect.SENSES, 24),
+    			new AspectList().add(Aspect.AIR, 32).add(Aspect.ARMOR, 16).add(Aspect.CRYSTAL, 16).add(Aspect.SENSES, 24),
 //    			new ItemStack(Items.potionitem, 1, CustomPotionHelper.metadataTable[0][3]),
     			CustomPotionHelper.getSampleItem(1, CustomPotionHelper.getMaxDuration(), 0, false),
     			new ItemStack[]{
@@ -392,7 +405,7 @@ public class InfusionBrewing {
     			RESEARCH_RING,
     			new ItemStack(itemPotionBaubles[1]),
     			8,
-    			new AspectList().add(Aspect.WATER, 32).add(Aspect.MAGIC, 16).add(Aspect.CRYSTAL, 16).add(Aspect.MAN, 24),
+    			new AspectList().add(Aspect.WATER, 32).add(Aspect.ARMOR, 16).add(Aspect.CRYSTAL, 16).add(Aspect.MAN, 24),
 //    			new ItemStack(Items.potionitem, 1, CustomPotionHelper.metadataTable[0][3]),
     			CustomPotionHelper.getSampleItem(1, CustomPotionHelper.getMaxDuration(), 0, false),
     			new ItemStack[]{
@@ -407,7 +420,7 @@ public class InfusionBrewing {
 
     	research = new ResearchItem(
     			RESEARCH_BELT, RESEARCH_CATEGORY,
-    			new AspectList().add(Aspect.EARTH, 1).add(Aspect.CRYSTAL, 1).add(Aspect.BEAST, 1),
+    			new AspectList().add(Aspect.EARTH, 1).add(Aspect.ARMOR, 1).add(Aspect.BEAST, 1),
     			6, -4, 2, new ItemStack(itemPotionBaubles[2])
     			).setStub().setParents(new String[]{RESEARCH_DURATION, "ENCHFABRIC", "TALLOW"})
     			.setRound().registerResearchItem();
@@ -418,7 +431,7 @@ public class InfusionBrewing {
     			RESEARCH_BELT,
     			new ItemStack(itemPotionBaubles[2]),
     			8,
-    			new AspectList().add(Aspect.EARTH, 32).add(Aspect.MAGIC, 16).add(Aspect.CRYSTAL, 16).add(Aspect.BEAST, 24),
+    			new AspectList().add(Aspect.EARTH, 32).add(Aspect.ARMOR, 16).add(Aspect.CRYSTAL, 16).add(Aspect.BEAST, 24),
 //    			new ItemStack(Items.potionitem, 1, CustomPotionHelper.metadataTable[0][3]),
     			CustomPotionHelper.getSampleItem(1, CustomPotionHelper.getMaxDuration(), 0, false),
     			new ItemStack[]{
@@ -430,16 +443,98 @@ public class InfusionBrewing {
     			.setMode(InfusionBrewingRecipe.MODE.BAUBLES);
     	ThaumcraftApi.getCraftingRecipes().add(iRecipe);
     	pages[1] = new ResearchPage(iRecipe);
+    	
+    	// Focus
+    	
+    	research = new ResearchItem(
+    			RESEARCH_FOCUS, RESEARCH_CATEGORY,
+    			new AspectList().add(Aspect.FIRE, 1).add(Aspect.ENERGY, 1).add(Aspect.ENTROPY, 1),
+    			6, -1, 2, new ItemStack(itemPotionFocus)
+    			).setStub().setParents(new String[]{RESEARCH_DURATION, RESEARCH_SPLASH, "NITOR", "ALUMENTUM"})
+    			.setRound().registerResearchItem();
+    	pages = new ResearchPage[2];
+    	pages[0] = new ResearchPage("tc.research_page." + RESEARCH_FOCUS + ".0");
+    	research.setPages(pages);
+    	iRecipe = new InfusionBrewingRecipe(
+    			RESEARCH_FOCUS,
+    			new ItemStack(itemPotionFocus),
+    			8,
+    			new AspectList().add(Aspect.FIRE, 24).add(Aspect.MAGIC, 16).add(Aspect.ENERGY, 32).add(Aspect.ENTROPY, 24),
+//    			new ItemStack(Items.potionitem, 1, CustomPotionHelper.metadataTable[0][3]),
+    			CustomPotionHelper.getSampleItem(1, CustomPotionHelper.getMaxDuration(), 0, true),
+    			new ItemStack[]{
+	    				ItemApi.getItem("itemShard", 1), // Fire Shard
+    				ItemApi.getItem("itemResource", 0), // Almentum
+    				ItemApi.getItem("itemResource", 1), // Nitor
+    				ItemApi.getItem("itemResource", 15), // Primal Charm
+    			})
+    			.setMode(InfusionBrewingRecipe.MODE.FOCUS);
+    	ThaumcraftApi.getCraftingRecipes().add(iRecipe);
+    	pages[1] = new ResearchPage(iRecipe);
+    	
+    	// Upgrade
+    	
+    	pages = new ResearchPage[5];
+    	research = ResearchHelper.makeResearch(RESEARCH_SPAWNER_POWER,
+    			new AspectList().add(Aspect.SOUL, 1).add(Aspect.UNDEAD, 1).add(Aspect.DARKNESS, 1).add(Aspect.POISON, 1),
+    			6, 1, 3, new String[]{ RESEARCH_AMPLIFIER }, false,
+    			new ItemStack(itemSpawnerUpgrade, 1, 3), pages);
+    	for(int i = 0; i < 4; i++){
+	    	iRecipe = new InfusionBrewingRecipe(RESEARCH_SPAWNER_POWER,
+	    			new ItemStack(itemSpawnerUpgrade, 1, i), 2 + i * 3,
+	    			new AspectList()
+	    				.add(Aspect.SOUL, 12 * (i + 1))
+	    				.add(Aspect.UNDEAD, 12 * (i + 1))
+	    				.add(Aspect.DARKNESS, 16 * (i + 1))
+	    				.add(Aspect.POISON, 12 * (i + 1))
+	    				.add(Aspect.FIRE, 16 * (i + 1)),
+	    			(i == 0) ? new ItemStack(Items.paper) : new ItemStack(itemSpawnerUpgrade, 1, i - 1),
+	    			new ItemStack[]{
+	    				CustomPotionHelper.getSampleItem(CustomPotionHelper.STRENGTH, 0, i, false),
+	    				CustomPotionHelper.getSampleItem(CustomPotionHelper.POISON, 0, i, false),
+	    				CustomPotionHelper.getSampleItem(CustomPotionHelper.DECAY, 0, i, false),
+	    				(i < 2) ?	ItemApi.getItem("itemShard", 1) : // Fire Shard
+	    							ItemApi.getBlock("blockCustomPlant", 3), // Cinder Pearl
+	    				(i < 3) ?	ItemApi.getItem("itemResource", 1) : // Nitor
+	    							new ItemStack(Items.nether_star),	
+	    				(i == 0) ? new ItemStack(Items.blaze_powder) : new ItemStack(Items.magma_cream),
+	    				(i < 2) ? new ItemStack(Items.redstone) : new ItemStack(Blocks.redstone_block),
+	    				(i < 3) ? new ItemStack(Items.dye) : new ItemStack(Blocks.diamond_ore)
+	    			}).setMode(InfusionBrewingRecipe.MODE.UPGRADE);
+	    	ThaumcraftApi.getCraftingRecipes().add(iRecipe);
+	    	pages[i + 1] = new ResearchPage(iRecipe);
+    	}
 
-    	MinecraftForge.EVENT_BUS.register(FillBucketHandler.INSTANCE);
-		BlockDispenser.dispenseBehaviorRegistry.putObject(itemMagicBottle, BehaviorDispenseMagicGlass.INSTANCE);
-		BlockDispenser.dispenseBehaviorRegistry.putObject(itemMagicBucket, BehaviorDispenseMagicBucket.INSTANCE);
-		if(!DISPENSE_MAGIC_BUCKET){
-			BlockDispenser.dispenseBehaviorRegistry.putObject(Items.bucket, BehaviorDispenseMagicBucket.INSTANCE);
-		}
-		BehaviorDispencePotionBucket.DISPENSE_MAGIC_BUCKET = DISPENSE_MAGIC_BUCKET;
-		for(int i = 0; i < POTION_COUNT; i++){
-    		BlockDispenser.dispenseBehaviorRegistry.putObject(itemPotionBuckets[i], BehaviorDispencePotionBucket.INSTANCE);
+    	
+    	pages = new ResearchPage[5];
+    	research = ResearchHelper.makeResearch(RESEARCH_SPAWNER_SPEED,
+    			new AspectList().add(Aspect.MOTION, 1).add(Aspect.UNDEAD, 1).add(Aspect.BEAST, 1).add(Aspect.TRAVEL, 1),
+    			6, 3, 3, new String[]{ RESEARCH_AMPLIFIER }, false,
+    			new ItemStack(itemSpawnerUpgrade, 1, 7), pages);
+    	for(int i = 0; i < 4; i++){
+	    	iRecipe = new InfusionBrewingRecipe(RESEARCH_SPAWNER_SPEED,
+	    			new ItemStack(itemSpawnerUpgrade, 1, i + 4), 2 + i * 3,
+	    			new AspectList()
+	    				.add(Aspect.MOTION, 12 * (i + 1))
+	    				.add(Aspect.UNDEAD, 8 * (i + 1))
+	    				.add(Aspect.BEAST, 16 * (i + 1))
+	    				.add(Aspect.TRAVEL, 12 * (i + 1))
+	    				.add(Aspect.AIR, 16 * (i + 1)),
+	    			(i == 0) ? new ItemStack(Items.paper) : new ItemStack(itemSpawnerUpgrade, 1, i + 3),
+	    			new ItemStack[]{
+	    				CustomPotionHelper.getSampleItem(CustomPotionHelper.SWIFTNESS, 0, i, false),
+	    				CustomPotionHelper.getSampleItem(CustomPotionHelper.NAUSEA, 0, i, false),
+	    				CustomPotionHelper.getSampleItem(CustomPotionHelper.HUNGER, 0, i, false),
+	    				(i < 2) ?	ItemApi.getItem("itemShard", 0) : // Air Shard
+	    							ItemApi.getBlock("blockCustomPlant", 2), // Shimmer Leaf
+	    				(i < 3) ?	ItemApi.getItem("itemResource", 0) : // Almentum
+    							new ItemStack(Items.nether_star),
+    					(i < 1) ? new ItemStack(Items.ender_pearl) : new ItemStack(Items.ender_eye),
+	    				(i < 2) ? new ItemStack(Items.glowstone_dust) : new ItemStack(Blocks.glowstone),
+	    				(i < 3) ? new ItemStack(Items.emerald) : new ItemStack(Blocks.emerald_ore)
+	    			}).setMode(InfusionBrewingRecipe.MODE.UPGRADE);
+	    	ThaumcraftApi.getCraftingRecipes().add(iRecipe);
+	    	pages[i + 1] = new ResearchPage(iRecipe);
     	}
     }
     
@@ -469,28 +564,28 @@ public class InfusionBrewing {
 			new ItemStack[]{ new ItemStack(Items.porkchop), new ItemStack(Items.nether_wart), new ItemStack(Items.cookie) } };
     
     private final AspectList[] inputAspects = new AspectList[]{
-    		new AspectList().add(Aspect.MOTION, 16).add(Aspect.ORDER, 12).add(Aspect.MAGIC, 8),
-			new AspectList().add(Aspect.MOTION, 16).add(Aspect.ENTROPY, 12).add(Aspect.MAGIC, 8),
-			new AspectList().add(Aspect.TOOL, 16).add(Aspect.ORDER, 12).add(Aspect.MAGIC, 8),
-			new AspectList().add(Aspect.TOOL, 16).add(Aspect.ENTROPY, 12).add(Aspect.MAGIC, 8),
-			new AspectList().add(Aspect.ENERGY, 16).add(Aspect.ORDER, 12).add(Aspect.MAGIC, 8),
-			new AspectList().add(Aspect.HEAL, 16).add(Aspect.ORDER, 12).add(Aspect.MAGIC, 8),
-			new AspectList().add(Aspect.HEAL, 16).add(Aspect.ENTROPY, 12).add(Aspect.MAGIC, 8),
-			new AspectList().add(Aspect.FLIGHT, 16).add(Aspect.ORDER, 12).add(Aspect.MAGIC, 8),
-			new AspectList().add(Aspect.TRAP, 16).add(Aspect.ENTROPY, 12).add(Aspect.MAGIC, 8),
-			new AspectList().add(Aspect.HEAL, 16).add(Aspect.ORDER, 12).add(Aspect.MAGIC, 8),
-			new AspectList().add(Aspect.ARMOR, 16).add(Aspect.ORDER, 12).add(Aspect.MAGIC, 8),
-			new AspectList().add(Aspect.FIRE, 16).add(Aspect.ORDER, 12).add(Aspect.MAGIC, 8),
-			new AspectList().add(Aspect.AIR, 16).add(Aspect.ORDER, 12).add(Aspect.MAGIC, 8),
-			new AspectList().add(Aspect.DARKNESS, 16).add(Aspect.ORDER, 12).add(Aspect.MAGIC, 8),
-			new AspectList().add(Aspect.DARKNESS, 16).add(Aspect.ENTROPY, 12).add(Aspect.MAGIC, 8),
-			new AspectList().add(Aspect.DARKNESS, 16).add(Aspect.ENTROPY, 12).add(Aspect.MAGIC, 8),
-			new AspectList().add(Aspect.HUNGER, 16).add(Aspect.ENTROPY, 12).add(Aspect.MAGIC, 8),
-			new AspectList().add(Aspect.ENERGY, 16).add(Aspect.ENTROPY, 12).add(Aspect.MAGIC, 8),
-			new AspectList().add(Aspect.POISON, 16).add(Aspect.ENTROPY, 12).add(Aspect.MAGIC, 8),
-			new AspectList().add(Aspect.VOID, 16).add(Aspect.ENTROPY, 12).add(Aspect.MAGIC, 8),
-			new AspectList().add(Aspect.MAN, 16).add(Aspect.ORDER, 12).add(Aspect.MAGIC, 8),
-			new AspectList().add(Aspect.MAN, 16).add(Aspect.ORDER, 12).add(Aspect.MAGIC, 8),
-			new AspectList().add(Aspect.FLESH, 16).add(Aspect.ORDER, 12).add(Aspect.MAGIC, 8) };
+    		new AspectList().add(Aspect.MOTION, 16).add(Aspect.ORDER, 12).add(Aspect.PLANT, 8),
+			new AspectList().add(Aspect.MOTION, 16).add(Aspect.ENTROPY, 12).add(Aspect.PLANT, 8),
+			new AspectList().add(Aspect.TOOL, 16).add(Aspect.ORDER, 12).add(Aspect.PLANT, 8),
+			new AspectList().add(Aspect.TOOL, 16).add(Aspect.ENTROPY, 12).add(Aspect.PLANT, 8),
+			new AspectList().add(Aspect.ENERGY, 16).add(Aspect.ORDER, 12).add(Aspect.PLANT, 8),
+			new AspectList().add(Aspect.HEAL, 16).add(Aspect.ORDER, 12).add(Aspect.PLANT, 8),
+			new AspectList().add(Aspect.HEAL, 16).add(Aspect.ENTROPY, 12).add(Aspect.PLANT, 8),
+			new AspectList().add(Aspect.FLIGHT, 16).add(Aspect.ORDER, 12).add(Aspect.PLANT, 8),
+			new AspectList().add(Aspect.TRAP, 16).add(Aspect.ENTROPY, 12).add(Aspect.PLANT, 8),
+			new AspectList().add(Aspect.HEAL, 16).add(Aspect.ORDER, 12).add(Aspect.PLANT, 8),
+			new AspectList().add(Aspect.ARMOR, 16).add(Aspect.ORDER, 12).add(Aspect.PLANT, 8),
+			new AspectList().add(Aspect.FIRE, 16).add(Aspect.ORDER, 12).add(Aspect.PLANT, 8),
+			new AspectList().add(Aspect.AIR, 16).add(Aspect.ORDER, 12).add(Aspect.PLANT, 8),
+			new AspectList().add(Aspect.DARKNESS, 16).add(Aspect.ORDER, 12).add(Aspect.PLANT, 8),
+			new AspectList().add(Aspect.DARKNESS, 16).add(Aspect.ENTROPY, 12).add(Aspect.PLANT, 8),
+			new AspectList().add(Aspect.DARKNESS, 16).add(Aspect.ENTROPY, 12).add(Aspect.PLANT, 8),
+			new AspectList().add(Aspect.HUNGER, 16).add(Aspect.ENTROPY, 12).add(Aspect.PLANT, 8),
+			new AspectList().add(Aspect.ENERGY, 16).add(Aspect.ENTROPY, 12).add(Aspect.PLANT, 8),
+			new AspectList().add(Aspect.POISON, 16).add(Aspect.ENTROPY, 12).add(Aspect.PLANT, 8),
+			new AspectList().add(Aspect.VOID, 16).add(Aspect.ENTROPY, 12).add(Aspect.PLANT, 8),
+			new AspectList().add(Aspect.MAN, 16).add(Aspect.ORDER, 12).add(Aspect.PLANT, 8),
+			new AspectList().add(Aspect.MAN, 16).add(Aspect.ORDER, 12).add(Aspect.PLANT, 8),
+			new AspectList().add(Aspect.FLESH, 16).add(Aspect.ORDER, 12).add(Aspect.PLANT, 8) };
     
 }

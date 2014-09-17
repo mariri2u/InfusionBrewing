@@ -4,6 +4,7 @@ import java.util.List;
 
 import mariri.infusionbrewing.misc.CustomPotionHelper;
 import net.minecraft.client.renderer.texture.IIconRegister;
+import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
@@ -55,8 +56,12 @@ public class ItemPotionBaubles extends Item implements IBauble{
 		if(player instanceof EntityPlayer && !player.worldObj.isRemote) {
 			NBTTagCompound tag = CustomPotionHelper.findPotionNBT(itemstack);
 			CustomPotionHelper potion = new CustomPotionHelper(1, 0, 0);
-			if(tag != null){
+			int meta = itemstack.getItemDamage();
+			if(tag.hasKey("Id")){
 				potion = CustomPotionHelper.getInstanceFromNBTTag(tag);
+			}else if(meta <= CustomPotionHelper.EFFECT_VALUE){
+				potion.setId(meta);
+				potion.setAmplifier(potion.isNoAmplifier() ? 0 : CustomPotionHelper.MAX_AMPLIFIER);
 			}
 			PotionEffect effect = player.getActivePotionEffect(Potion.potionTypes[potion.getId()]);
 			if(effect == null || effect.getAmplifier() < potion.getAmplifier() || effect.getDuration() < UPDATE_TICK) {
@@ -110,14 +115,28 @@ public class ItemPotionBaubles extends Item implements IBauble{
 	public void addInformation(ItemStack itemstack, EntityPlayer player, List tooltip, boolean par4) {
 		NBTTagCompound tag = CustomPotionHelper.findPotionNBT(itemstack);
 		CustomPotionHelper potion = new CustomPotionHelper(1, 0, 0);
-		if(tag != null){
+		int meta = itemstack.getItemDamage();
+		if(tag.hasKey("Id")){
 			potion = CustomPotionHelper.getInstanceFromNBTTag(tag);
+		}else if(meta <= CustomPotionHelper.EFFECT_VALUE){
+			potion.setId(meta);
+			potion.setAmplifier(potion.isNoAmplifier() ? 0 : CustomPotionHelper.MAX_AMPLIFIER);
 		}
 		String name = StatCollector.translateToLocal(Potion.potionTypes[potion.getId()].getName());
 		String lv = StatCollector.translateToLocal("potion.potency." + potion.getAmplifier());
 		tooltip.add(name + " " + lv);
 	}
-	  
+	
+    @SideOnly(Side.CLIENT)
+    public void getSubItems(Item item, CreativeTabs creativeTab, List list)
+    {
+    	for(int i = 0; i < CustomPotionHelper.SUPPORT_IDS.length; i++){
+    		if(!CustomPotionHelper.isInstant(CustomPotionHelper.SUPPORT_IDS[i])){
+    			list.add(new ItemStack(item, 1, CustomPotionHelper.SUPPORT_IDS[i]));
+    		}
+    	}
+    }
+    
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void registerIcons(IIconRegister iconregister) {

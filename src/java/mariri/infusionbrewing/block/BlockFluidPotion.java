@@ -18,6 +18,7 @@ import net.minecraft.entity.monster.EntityCreeper;
 import net.minecraft.entity.monster.EntityEnderman;
 import net.minecraft.entity.monster.EntityPigZombie;
 import net.minecraft.entity.monster.EntitySkeleton;
+import net.minecraft.entity.monster.EntitySlime;
 import net.minecraft.entity.monster.EntitySpider;
 import net.minecraft.entity.monster.EntityWitch;
 import net.minecraft.entity.monster.EntityZombie;
@@ -162,6 +163,9 @@ public class BlockFluidPotion extends BlockFluidClassic {
 				}
 				if(this.potionEffect == CustomPotionHelper.LEAPING || effect == CustomPotionHelper.LEAPING){
 					spawnCreature(world, x, y, z, new EntityBat(world), 0.1);
+				}
+				if(this.potionEffect == CustomPotionHelper.REGENATION || effect == CustomPotionHelper.REGENATION){
+					spawnCreature(world, x, y, z, new EntitySlime(world), 0.1);
 				}
 				if(this.potionEffect == CustomPotionHelper.WATER_BREATHING || effect == CustomPotionHelper.WATER_BREATHING){
 					spawnCreature(world, x, y, z, new EntitySquid(world), 0.1);
@@ -380,6 +384,11 @@ public class BlockFluidPotion extends BlockFluidClassic {
 			}else{
 				if(world.getWorldTime() % 20 == 0){
 					((EntityLivingBase)entity).addPotionEffect(new PotionEffect(potionEffect, 100, 0));
+//					if(potionEffect == CustomPotionHelper.NAUSEA && entity instanceof EntityCreature){
+//						if(world.rand.nextDouble() <= 1){
+//							spawnItem(world, x, y, z, new ItemStack(Items.spawn_egg, 1, entity.getEntityId()));
+//						}
+//					}
 				}
 			}
 		}
