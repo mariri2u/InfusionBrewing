@@ -52,6 +52,14 @@ public class CustomPotionHelper {
 	
 	public static final int EFFECT_VALUE = 23;
 	
+	public static final int EFFECT_SHIFT = 0;
+	public static final int AMPLIFIER_SHIFT = 5;
+	public static final int SPLASH_SHIFT = 14;
+	
+	public static final int EFFECT_MASK =		0x0000001F << EFFECT_SHIFT;
+	public static final int AMPLIFIER_MASK = 	0x00000003 << AMPLIFIER_SHIFT;
+	public static final int SPLASH_MASK =		0x00000001 << SPLASH_SHIFT;
+	
 	public CustomPotionHelper(){
 		id = 1;
 		duration = this.isInstant() ? INSTANT_DURATION : DURATION_TABLE[0];
@@ -142,6 +150,10 @@ public class CustomPotionHelper {
 	}
 	
 	public boolean isNoAmplifier(){
+		return isNoAmplifier(id);
+	}
+	
+	public static boolean isNoAmplifier(int id){
 		for(int i : NO_AMPLIFIER_IDS){
 			if(i == id){ return true; }
 		}
@@ -216,7 +228,7 @@ public class CustomPotionHelper {
 		CustomPotionHelper potion = new CustomPotionHelper(id, DURATION_TABLE[durationCode], amplifier);
 		itemstack.setTagCompound(createVoidNBTTag());
 		potion.writeToNBTTag(findPotionNBT(itemstack));
-		itemstack.setItemDamage(metadataTable[id - 1][splash ? 2 : 0]);
+		itemstack.setItemDamage(vanillaMetadataTable[id - 1][splash ? 2 : 0]);
 		return itemstack;
 	}
 	
@@ -225,9 +237,32 @@ public class CustomPotionHelper {
 		itemstack.stackSize = stacksize;
 		return itemstack;
 	}
-
 	
-	public static final int[][] metadataTable = new int[][]{
+	public CustomPotionHelper decodeFromCustomMetadata(int meta){
+		this.id = (meta & EFFECT_MASK) >> EFFECT_SHIFT;
+		this.amplifier = (meta & AMPLIFIER_MASK) >> AMPLIFIER_SHIFT;
+		return this;
+	}
+	
+	public static CustomPotionHelper createFromCustomMetadata(int meta){
+		CustomPotionHelper inst = new CustomPotionHelper();
+		inst.decodeFromCustomMetadata(meta);
+		return inst;
+	}
+	
+	public int encodeToCustomMetadata(boolean splash){
+		return encodeToCustomMetadata(this.id, this.amplifier, splash);
+	}
+	
+	public static int encodeToCustomMetadata(int id, int amplifier, boolean splash){
+		int meta = 0;
+		meta |= id << EFFECT_SHIFT;
+		meta |= amplifier << AMPLIFIER_SHIFT;
+		meta |= splash ? SPLASH_MASK : 0;
+		return meta;
+	}
+	
+	public static final int[][] vanillaMetadataTable = new int[][]{
 		new int[] {8194, 8226, 16386, 8258}, // swiftness
 		new int[] {8234, 8266, 16426, 3}, // slow
 		new int[] {1, 2, 16384, 3}, // haste

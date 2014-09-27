@@ -132,24 +132,26 @@ public class InfusionBrewingRecipe extends InfusionRecipe {
 		if(mode == MODE.AMPLIFIER){
 			potion.incrementAmplifier();
 			if(ItemPotion.isSplash(input.getItemDamage())){
-				output.setItemDamage(CustomPotionHelper.metadataTable[potion.getId() - 1][2]);
+				output.setItemDamage(CustomPotionHelper.vanillaMetadataTable[potion.getId() - 1][2]);
 			}else{
-				output.setItemDamage(CustomPotionHelper.metadataTable[potion.getId() - 1][0]);
+				output.setItemDamage(CustomPotionHelper.vanillaMetadataTable[potion.getId() - 1][0]);
 			}
 			potion.writeToNBTTag(tag);
 		}else if(mode == MODE.DURATION){
 			potion.incrementDurationCode();
 			if(ItemPotion.isSplash(input.getItemDamage())){
-				output.setItemDamage(CustomPotionHelper.metadataTable[potion.getId() - 1][2]);
+				output.setItemDamage(CustomPotionHelper.vanillaMetadataTable[potion.getId() - 1][2]);
 			}else{
-				output.setItemDamage(CustomPotionHelper.metadataTable[potion.getId() - 1][1]);
+				output.setItemDamage(CustomPotionHelper.vanillaMetadataTable[potion.getId() - 1][1]);
 			}
 			potion.writeToNBTTag(tag);
 		}else if(mode == MODE.SPLASH){
-			output.setItemDamage(CustomPotionHelper.metadataTable[potion.getId() - 1][2]);
+			output.setItemDamage(CustomPotionHelper.vanillaMetadataTable[potion.getId() - 1][2]);
 		}else if(mode == MODE.BAUBLES || mode == MODE.FOCUS){
 			output = ((ItemStack)super.getRecipeOutput(input)).copy();
-			output.setTagCompound(input.getTagCompound());
+			CustomPotionHelper helper = CustomPotionHelper.getInstanceFromNBTTag(CustomPotionHelper.findPotionNBT(input));
+			output.setItemDamage(helper.encodeToCustomMetadata(false));
+//			output.setTagCompound(input.getTagCompound());
 //			NBTTagCompound t = CustomPotionHelper.createVoidNBTTag();
 //			output.setTagCompound(t);
 //			NBTTagCompound tt = CustomPotionHelper.findPotionNBT(t);

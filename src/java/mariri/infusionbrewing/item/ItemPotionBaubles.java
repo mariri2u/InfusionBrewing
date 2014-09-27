@@ -59,9 +59,8 @@ public class ItemPotionBaubles extends Item implements IBauble{
 			int meta = itemstack.getItemDamage();
 			if(tag.hasKey("Id")){
 				potion = CustomPotionHelper.getInstanceFromNBTTag(tag);
-			}else if(meta <= CustomPotionHelper.EFFECT_VALUE){
-				potion.setId(meta);
-				potion.setAmplifier(potion.isNoAmplifier() ? 0 : CustomPotionHelper.MAX_AMPLIFIER);
+			}else{
+				potion.decodeFromCustomMetadata(itemstack.getItemDamage());
 			}
 			PotionEffect effect = player.getActivePotionEffect(Potion.potionTypes[potion.getId()]);
 			if(effect == null || effect.getAmplifier() < potion.getAmplifier() || effect.getDuration() < UPDATE_TICK) {
@@ -76,31 +75,9 @@ public class ItemPotionBaubles extends Item implements IBauble{
 	}
 	
 	public void onEquipped(ItemStack itemstack, EntityLivingBase player){
-//		if(player instanceof EntityPlayer && !player.worldObj.isRemote) {
-//			NBTTagCompound tag = CustomPotionHelper.findPotionNBT(itemstack);
-//			if(tag != null){
-//				CustomPotionHelper potion = CustomPotionHelper.getInstanceFromNBTTag(tag);
-//				if(ThaumcraftApiHelper.consumeVisFromInventory((EntityPlayer)player, cost)){
-//					if(player.getActivePotionEffect(Potion.potionTypes[potion.getId()]) != null) {
-//						player.removePotionEffect(potion.getId());
-//					}
-//					player.addPotionEffect(new PotionEffect(potion.getId(), getInterval(potion.getAmplifier()) + UPDATE_TICK, potion.getAmplifier(), true));
-//				}
-//			}
-//		}
 	}
 	
 	public void onUnequipped(ItemStack itemstack, EntityLivingBase player){
-//		if(player instanceof EntityPlayer && !player.worldObj.isRemote) {
-//			NBTTagCompound tag = CustomPotionHelper.findPotionNBT(itemstack);
-//			if(tag != null){
-//				CustomPotionHelper potion = CustomPotionHelper.getInstanceFromNBTTag(tag);
-//				
-//				PotionEffect effect = player.getActivePotionEffect(Potion.potionTypes[potion.getId()]);
-//				if(effect != null && effect.getAmplifier() == potion.getAmplifier())
-//					player.removePotionEffect(potion.getId());
-//			}
-//		}
 	}
 	
 	public boolean canEquip(ItemStack itemstack, EntityLivingBase player){
@@ -118,9 +95,8 @@ public class ItemPotionBaubles extends Item implements IBauble{
 		int meta = itemstack.getItemDamage();
 		if(tag.hasKey("Id")){
 			potion = CustomPotionHelper.getInstanceFromNBTTag(tag);
-		}else if(meta <= CustomPotionHelper.EFFECT_VALUE){
-			potion.setId(meta);
-			potion.setAmplifier(potion.isNoAmplifier() ? 0 : CustomPotionHelper.MAX_AMPLIFIER);
+		}else{
+			potion.decodeFromCustomMetadata(itemstack.getItemDamage());
 		}
 		String name = StatCollector.translateToLocal(Potion.potionTypes[potion.getId()].getName());
 		String lv = StatCollector.translateToLocal("potion.potency." + potion.getAmplifier());
@@ -130,9 +106,10 @@ public class ItemPotionBaubles extends Item implements IBauble{
     @SideOnly(Side.CLIENT)
     public void getSubItems(Item item, CreativeTabs creativeTab, List list)
     {
-    	for(int i = 0; i < CustomPotionHelper.SUPPORT_IDS.length; i++){
-    		if(!CustomPotionHelper.isInstant(CustomPotionHelper.SUPPORT_IDS[i])){
-    			list.add(new ItemStack(item, 1, CustomPotionHelper.SUPPORT_IDS[i]));
+    	int amp_bits = 3 << CustomPotionHelper.AMPLIFIER_SHIFT; 
+    	for(int effect : CustomPotionHelper.SUPPORT_IDS){
+    		if(!CustomPotionHelper.isInstant(effect)){
+        		list.add(new ItemStack(item, 1, CustomPotionHelper.isNoAmplifier(effect) ? effect : effect | amp_bits));
     		}
     	}
     }

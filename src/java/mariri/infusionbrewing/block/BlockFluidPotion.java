@@ -45,6 +45,7 @@ public class BlockFluidPotion extends BlockFluidClassic {
 	protected IIcon[] theIcon;
 	protected int potionEffect;
 	protected boolean explode = true;
+	protected int explosionPower = 3;
 	protected boolean spawn = true;
 	protected boolean infinity = true;
 	
@@ -63,6 +64,11 @@ public class BlockFluidPotion extends BlockFluidClassic {
 	
 	public BlockFluidPotion setExplode(boolean value){
 		this.explode = value;
+		return this;
+	}
+	
+	public BlockFluidPotion setExplosionPower(int value){
+		this.explosionPower = value;
 		return this;
 	}
 	
@@ -286,7 +292,7 @@ public class BlockFluidPotion extends BlockFluidClassic {
     
     private void createExplosion(World world, int x, int y ,int z){
     	if(explode){
-    		world.createExplosion(null, x, y, z, 4, true);
+    		world.createExplosion(null, x, y, z, explosionPower, true);
     	}
     }
 	

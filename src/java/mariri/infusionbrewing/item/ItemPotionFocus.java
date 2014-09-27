@@ -75,9 +75,6 @@ public class ItemPotionFocus extends Item implements IWandFocus {
 		AspectList cost = getVisCost();
 		for(Aspect vis : Aspect.getPrimalAspects()){
 			if(cost.getAmount(vis) > 0){
-//				int value = cost.getAmount(vis);
-//				value = value * (potion.getAmplifier() + 1) * (potion.isInstant() ? 1 : 4);
-//				cost.merge(vis, value);
 				cost.add(vis, cost.getAmount(vis) * potion.getAmplifier());
 			}
 		}
@@ -93,21 +90,15 @@ public class ItemPotionFocus extends Item implements IWandFocus {
 	public ItemStack onFocusRightClick(ItemStack itemstack, World world, EntityPlayer player, MovingObjectPosition movingobjectposition){
 
         if (!world.isRemote){
-//                NBTTagCompound nbt = itemstack.stackTagCompound.getCompoundTag("focus");
-//                ItemStack focus = ItemStack.loadItemStackFromNBT(nbt);
-//            	System.out.println(focus.getItem().getUnlocalizedName());
-
         	ItemStack focus = getFocusItem(itemstack);
             NBTTagCompound tag = CustomPotionHelper.findPotionNBT(focus);
             CustomPotionHelper effect = new CustomPotionHelper(1, 0, 0);
             if(tag.hasKey("Id")){
 	        	effect = CustomPotionHelper.getInstanceFromNBTTag(tag);
-            }else if(focus.getItemDamage() < CustomPotionHelper.EFFECT_VALUE){
-    			effect.setId(focus.getItemDamage());
-    			effect.setAmplifier(effect.isNoAmplifier() ? 0 : CustomPotionHelper.MAX_AMPLIFIER);
+            }else{
+            	effect.decodeFromCustomMetadata(focus.getItemDamage());
             }
         	effect.setDurationCode(0);
-//	        	System.out.println("Foci: " + effect.getId() + ", " + effect.getAmplifier() + ", " + effect.getDuration());
         	if(ThaumcraftApiHelper.consumeVisFromWand(itemstack, player, getVisCost(effect), true, false)){
                 world.playSoundAtEntity(player, "random.bow", 0.5F, 0.4F / (itemRand.nextFloat() * 0.4F + 0.8F));
                 ItemStack potion = effect.getSampleItem(true);
@@ -138,17 +129,14 @@ public class ItemPotionFocus extends Item implements IWandFocus {
 	@Override
 	public String getSortingHelper(ItemStack itemstack){
 		String str = "POTION";
-//    	ItemStack focus = getFocusItem(itemstack);
         NBTTagCompound tag = CustomPotionHelper.findPotionNBT(itemstack);
+        CustomPotionHelper effect = new CustomPotionHelper();
         if(tag.hasKey("Id")){
-        	CustomPotionHelper effect = CustomPotionHelper.getInstanceFromNBTTag(tag);
-        	str = str + ":" + effect.getId() + ":" + effect.getAmplifier();
-        }else if(itemstack.getItemDamage() < CustomPotionHelper.EFFECT_VALUE){
-        	CustomPotionHelper effect = new CustomPotionHelper(itemstack.getItemDamage());
-			effect.setAmplifier(effect.isNoAmplifier() ? 0 : CustomPotionHelper.MAX_AMPLIFIER);
-			str = str + ":" + effect.getId() + ":" + effect.getAmplifier();
+        	effect = CustomPotionHelper.getInstanceFromNBTTag(tag);
+		}else{
+			effect.decodeFromCustomMetadata(itemstack.getItemDamage()); 
 		}
-//        System.out.println(str);
+    	str = str + ":" + effect.getId() + ":" + effect.getAmplifier();
 		return str;
 	}
 
@@ -175,9 +163,8 @@ public class ItemPotionFocus extends Item implements IWandFocus {
 		CustomPotionHelper potion = new CustomPotionHelper(1, 0, 0);
 		if(tag.hasKey("Id")){
 			potion = CustomPotionHelper.getInstanceFromNBTTag(tag);
-		}else if(itemstack.getItemDamage() <= CustomPotionHelper.EFFECT_VALUE){
-			potion.setId(itemstack.getItemDamage());
-			potion.setAmplifier(potion.isNoAmplifier() ? 0 : CustomPotionHelper.MAX_AMPLIFIER);
+		}else{
+			potion.decodeFromCustomMetadata(itemstack.getItemDamage());
 		}
 		String name = StatCollector.translateToLocal(Potion.potionTypes[potion.getId()].getName());
 		String lv = StatCollector.translateToLocal("potion.potency." + potion.getAmplifier());
@@ -197,22 +184,15 @@ public class ItemPotionFocus extends Item implements IWandFocus {
     @SideOnly(Side.CLIENT)
     public void getSubItems(Item item, CreativeTabs creativeTab, List list)
     {
-    	for(int i = 0; i < CustomPotionHelper.EFFECT_VALUE; i++){
-    		list.add(new ItemStack(item, 1, i + 1));
+    	int amp_bits = 3 << CustomPotionHelper.AMPLIFIER_SHIFT; 
+    	for(int i = 1; i <= CustomPotionHelper.EFFECT_VALUE; i++){
+    		list.add(new ItemStack(item, 1, CustomPotionHelper.isNoAmplifier(i) ? i : i | amp_bits));
     	}
     }
 	
 	@Override
 	public void registerIcons(IIconRegister iconregister){
 		this.itemIcon = iconregister.registerIcon("mariri:focus_potion");
-
-		if (hasOrnament()){
-//			ornament = IconHelper.forItem(iconregister, this, "Orn");
-		}
-		if (hasDepth()){
-//			depth = IconHelper.forItem(iconregister, this, "Depth");
-		}
-
 	}
 	
 	private ItemStack getFocusItem(ItemStack stack){

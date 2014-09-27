@@ -1,13 +1,17 @@
 package mariri.infusionbrewing.misc;
 
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.ChatComponentText;
+import net.minecraft.world.World;
 
 public class CustomSpawnerHelper {
 	private int delay;
 	private int maxNearbyEntities;
 	private int maxSpawnDelay;
 	private int minSpawnDelay;
-	private int requirePlayerRange;
+	private int requiredPlayerRange;
 	private int spawnCount;
 	private int spawnRange;
 	private String entityId;
@@ -24,7 +28,7 @@ public class CustomSpawnerHelper {
 		maxNearbyEntities = 6;
 		maxSpawnDelay = 800;
 		minSpawnDelay = 200;
-		requirePlayerRange = 16;
+		requiredPlayerRange = 16;
 		spawnCount = 4;
 		spawnRange = 4;
 		entityId = "Pig";
@@ -199,20 +203,21 @@ public class CustomSpawnerHelper {
 		tag.setShort("MaxNearbyEntities", (short)maxNearbyEntities);
 		tag.setShort("MaxSpawnDelay", (short)maxSpawnDelay);
 		tag.setShort("MinSpawnDelay", (short)minSpawnDelay);
-		tag.setShort("RequirePlayerRange", (short)requirePlayerRange);
+//		tag.setShort("RequirePlayerRange", (short)requiredPlayerRange);
 		tag.setShort("SpawnCount", (short)spawnCount);
-		tag.setShort("SpawnRange", (short)spawnRange);
-		tag.setString("EntityId", entityId);
-		tag.setString("id", this.id);
+//		tag.setShort("SpawnRange", (short)spawnRange);
+//		tag.setString("EntityId", entityId);
+//		tag.setString("id", this.id);
 	}
 	
 	public void readFromNBTTag(NBTTagCompound tag){
 		maxNearbyEntities = tag.getShort("MaxNearbyEntities");
 		maxSpawnDelay = tag.getShort("MaxSpawnDelay");
 		minSpawnDelay = tag.getShort("MinSpawnDelay");
-		requirePlayerRange = tag.getShort("RequirePlayerRange");
+		requiredPlayerRange = tag.getShort("RequiredPlayerRange");
 		spawnCount = tag.getShort("SpawnCount");
 		spawnRange = tag.getShort("SpawnRange");
+		delay = tag.getShort("Delay");
 		entityId = tag.getString("EntityId");
 	}
 	
@@ -221,5 +226,35 @@ public class CustomSpawnerHelper {
 		if(tag == null) { return inst; }
 		inst.readFromNBTTag(tag);
 		return inst;
+	}
+	
+
+	
+	public static void showSpawnerLevel(World world, int x, int y, int z, EntityPlayer player){
+    	TileEntity te = world.getTileEntity(x, y, z);
+    	NBTTagCompound tag = new NBTTagCompound();
+    	te.writeToNBT(tag);
+    	CustomSpawnerHelper helper = CustomSpawnerHelper.getInstanceFromNBTTag(tag);
+    	player.addChatComponentMessage(new ChatComponentText("Spawner Info (" + helper.getEntityId() + ")"));
+    	player.addChatComponentMessage(new ChatComponentText("- Current Power: " + helper.getPowerCode()));
+    	player.addChatComponentMessage(new ChatComponentText("- Current Speed: " + helper.getSpeedCode()));
+        world.playSoundAtEntity(player, "random.orb", 1.0F, 1.0F);
+	}
+
+	public static void showSpawnerDetails(World world, int x, int y, int z, EntityPlayer player){
+    	TileEntity te = world.getTileEntity(x, y, z);
+    	NBTTagCompound tag = new NBTTagCompound();
+    	te.writeToNBT(tag);
+    	CustomSpawnerHelper helper = CustomSpawnerHelper.getInstanceFromNBTTag(tag);
+    	player.addChatComponentMessage(new ChatComponentText("Debug Info"));
+    	player.addChatComponentMessage(new ChatComponentText("- EntityId: " + helper.getEntityId()));
+    	player.addChatComponentMessage(new ChatComponentText("- Delay: " + helper.delay));
+    	player.addChatComponentMessage(new ChatComponentText("- MaxNearbyEntities: " + helper.getMaxNearbyEntities()));
+    	player.addChatComponentMessage(new ChatComponentText("- MaxSpawnDelay: " + helper.getMaxSpawnDelay()));
+    	player.addChatComponentMessage(new ChatComponentText("- MinSpawnDelay: " + helper.getMinSpawnDelay()));
+    	player.addChatComponentMessage(new ChatComponentText("- SpawnCount: " + helper.getSpawnCount()));
+    	player.addChatComponentMessage(new ChatComponentText("- SpawnRange: " + helper.spawnRange));
+    	player.addChatComponentMessage(new ChatComponentText("- RequiredPlayerRange: " + helper.requiredPlayerRange));
+        world.playSoundAtEntity(player, "random.orb", 1.0F, 1.0F);
 	}
 }

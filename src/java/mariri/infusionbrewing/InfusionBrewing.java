@@ -53,9 +53,9 @@ import cpw.mods.fml.common.registry.GameRegistry;
 @Mod(modid = InfusionBrewing.MODID, version = InfusionBrewing.VERSION, dependencies = InfusionBrewing.DEPENDENCIES )
 public class InfusionBrewing {
     public static final String MODID = "InfusionBrewing";
-    public static final String VERSION = "1.7.10-1.2-dev2";
-//    public static final String DEPENDENCIES = "required-after:Thaumcraft";
-    public static final String DEPENDENCIES = "after:Thaumcraft";
+    public static final String VERSION = "1.7.10-1.2-dev4";
+    public static final String DEPENDENCIES = "required-after:Thaumcraft";
+//    public static final String DEPENDENCIES = "after:Thaumcraft";
     
     public static BlockFluidPotion[] blockFluidPotions;
     public static BlockSemiSolidPotion blockSemiSolidPotion;
@@ -99,10 +99,13 @@ public class InfusionBrewing {
 //    public static final String INFUSION_BREWING_RESEARCH = "Brewing";
     
     public static boolean ENABLE_REACT_EXPLOSION;
+    public static int REACT_EXPLOSION_POWER;
     public static boolean ENABLE_REACT_SPAWN;
     public static boolean ENABLE_INFINITY_SOURCE;
     public static boolean DISPENSE_MAGIC_BUCKET;
     public static int POTION_STACK_SIZE;
+    
+    public static boolean SHOW_SPAWNER_DETAILS;
    
     public static ItemPotionBaubles[] itemPotionBaubles;
     
@@ -112,11 +115,14 @@ public class InfusionBrewing {
         config.load();
         
         ENABLE_REACT_EXPLOSION = config.get(Configuration.CATEGORY_GENERAL, "enableReactExplosion", true).getBoolean(true);
+        REACT_EXPLOSION_POWER = config.get(Configuration.CATEGORY_GENERAL, "reactExplosionPower", 3).getInt();
         ENABLE_REACT_SPAWN = config.get(Configuration.CATEGORY_GENERAL, "enableReactSpawn", true).getBoolean(true);
         ENABLE_INFINITY_SOURCE = config.get(Configuration.CATEGORY_GENERAL, "enableInfinitySource", true).getBoolean(true); 
         DISPENSE_MAGIC_BUCKET = config.get(Configuration.CATEGORY_GENERAL, "dispenseMagicBucket", false).getBoolean(false); 
         POTION_STACK_SIZE = config.get(Configuration.CATEGORY_GENERAL, "potionStackSize", 8).getInt(); 
       
+        SHOW_SPAWNER_DETAILS = config.get(Configuration.CATEGORY_GENERAL, "showSpawnerDetails", false).getBoolean(false);
+        
         config.save();
     }
     
@@ -158,6 +164,7 @@ public class InfusionBrewing {
         			(BlockFluidPotion)new BlockFluidPotion(fluidPotions[i], Material.water)
         			.setPotionEffect(i + 1)
         			.setExplode(ENABLE_REACT_EXPLOSION)
+        			.setExplosionPower(REACT_EXPLOSION_POWER)
         			.setSpawn(ENABLE_REACT_SPAWN)
         			.setInfinity(ENABLE_INFINITY_SOURCE)
         			.setBlockName("fluidPotion" + i);
@@ -223,7 +230,6 @@ public class InfusionBrewing {
     	}
 		
 		MinecraftForge.EVENT_BUS.register(new PlayerClickHandler());
-//		MinecraftForge.EVENT_BUS.register(new AttackEntityHandler());
     }
     
     private void initResearch(){
@@ -496,10 +502,10 @@ public class InfusionBrewing {
 	    				(i < 2) ?	ItemApi.getItem("itemShard", 1) : // Fire Shard
 	    							ItemApi.getBlock("blockCustomPlant", 3), // Cinder Pearl
 	    				(i < 3) ?	ItemApi.getItem("itemResource", 1) : // Nitor
-	    							new ItemStack(Items.nether_star),	
+	    							new ItemStack(Blocks.quartz_ore),	
 	    				(i == 0) ? new ItemStack(Items.blaze_powder) : new ItemStack(Items.magma_cream),
 	    				(i < 2) ? new ItemStack(Items.redstone) : new ItemStack(Blocks.redstone_block),
-	    				(i < 3) ? new ItemStack(Items.dye) : new ItemStack(Blocks.diamond_ore)
+	    				(i < 3) ? new ItemStack(Items.dye) : new ItemStack(Blocks.coal_ore)
 	    			}).setMode(InfusionBrewingRecipe.MODE.UPGRADE);
 	    	ThaumcraftApi.getCraftingRecipes().add(iRecipe);
 	    	pages[i + 1] = new ResearchPage(iRecipe);
