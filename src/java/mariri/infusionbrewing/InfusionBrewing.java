@@ -17,8 +17,13 @@ import mariri.infusionbrewing.item.ItemPotionBucket;
 import mariri.infusionbrewing.item.ItemPotionFocus;
 import mariri.infusionbrewing.item.ItemSpawnerUpgrade;
 import mariri.infusionbrewing.misc.CustomPotionHelper;
-import mariri.infusionbrewing.misc.InfusionBrewingRecipe;
 import mariri.infusionbrewing.misc.ResearchHelper;
+import mariri.infusionbrewing.recipe.InfusionBrewingRecipeAmplifier;
+import mariri.infusionbrewing.recipe.InfusionBrewingRecipeBaubles;
+import mariri.infusionbrewing.recipe.InfusionBrewingRecipeDuration;
+import mariri.infusionbrewing.recipe.InfusionBrewingRecipeFocus;
+import mariri.infusionbrewing.recipe.InfusionBrewingRecipeSplash;
+import mariri.infusionbrewing.recipe.InfusionBrewingRecipeUpgrade;
 import net.minecraft.block.BlockDispenser;
 import net.minecraft.block.material.Material;
 import net.minecraft.creativetab.CreativeTabs;
@@ -53,7 +58,7 @@ import cpw.mods.fml.common.registry.GameRegistry;
 @Mod(modid = InfusionBrewing.MODID, version = InfusionBrewing.VERSION, dependencies = InfusionBrewing.DEPENDENCIES )
 public class InfusionBrewing {
     public static final String MODID = "InfusionBrewing";
-    public static final String VERSION = "1.7.10-1.2-dev4";
+    public static final String VERSION = "1.7.10-1.3-dev1";
     public static final String DEPENDENCIES = "required-after:Thaumcraft";
 //    public static final String DEPENDENCIES = "after:Thaumcraft";
     
@@ -315,7 +320,7 @@ public class InfusionBrewing {
     	pages = new ResearchPage[2];
     	pages[0] = new ResearchPage("tc.research_page." + RESEARCH_DURATION + ".0");
     	research.setPages(pages);
-    	iRecipe = new InfusionBrewingRecipe(
+    	iRecipe = new InfusionBrewingRecipeDuration(
     			RESEARCH_DURATION,
 //    			new ItemStack(Items.potionitem, 1, CustomPotionHelper.metadataTable[0][3]),
     			CustomPotionHelper.getSampleItem(1, 1, 0, false),
@@ -323,8 +328,8 @@ public class InfusionBrewing {
     			new AspectList().add(Aspect.MOTION, 4).add(Aspect.MAGIC, 2),
 //    			new ItemStack(Items.potionitem, 1, CustomPotionHelper.metadataTable[0][0]),
     			CustomPotionHelper.getSampleItem(1, 0, 0, false),
-    			new ItemStack[]{ new ItemStack(Items.redstone) })
-    			.setMode(InfusionBrewingRecipe.MODE.DURATION);
+    			new ItemStack[]{ new ItemStack(Items.redstone) });
+//    			.setMode(InfusionBrewingRecipe.MODE.DURATION);
     	ThaumcraftApi.getCraftingRecipes().add(iRecipe);
     	pages[1] = new ResearchPage(iRecipe);
     	
@@ -336,7 +341,7 @@ public class InfusionBrewing {
     	pages = new ResearchPage[2];
     	pages[0] = new ResearchPage("tc.research_page." + RESEARCH_AMPLIFIER + ".0");
     	research.setPages(pages);
-    	iRecipe = new InfusionBrewingRecipe(
+    	iRecipe = new InfusionBrewingRecipeAmplifier(
     			RESEARCH_AMPLIFIER,
 //    			new ItemStack(Items.potionitem, 1, CustomPotionHelper.metadataTable[0][1]),
     			CustomPotionHelper.getSampleItem(1, 0, 1, false),
@@ -344,8 +349,8 @@ public class InfusionBrewing {
     			new AspectList().add(Aspect.ENERGY, 4).add(Aspect.MAGIC, 2),
 //    			new ItemStack(Items.potionitem, 1, CustomPotionHelper.metadataTable[0][0]),
     			CustomPotionHelper.getSampleItem(1, 0, 0, false),
-    			new ItemStack[]{ new ItemStack(Items.glowstone_dust) })
-    			.setMode(InfusionBrewingRecipe.MODE.AMPLIFIER);
+    			new ItemStack[]{ new ItemStack(Items.glowstone_dust) });
+//    			.setMode(InfusionBrewingRecipe.MODE.AMPLIFIER);
     	ThaumcraftApi.getCraftingRecipes().add(iRecipe);
     	pages[1] = new ResearchPage(iRecipe);
     	
@@ -357,7 +362,7 @@ public class InfusionBrewing {
     	pages = new ResearchPage[2];
     	pages[0] = new ResearchPage("tc.research_page." + RESEARCH_SPLASH + ".0");
     	research.setPages(pages);
-    	iRecipe = new InfusionBrewingRecipe(
+    	iRecipe = new InfusionBrewingRecipeSplash(
     			RESEARCH_SPLASH,
 //    			new ItemStack(Items.potionitem, 1, CustomPotionHelper.metadataTable[0][2]),
     			CustomPotionHelper.getSampleItem(1, 0, 0, true),
@@ -365,8 +370,8 @@ public class InfusionBrewing {
     			new AspectList().add(Aspect.FIRE, 4).add(Aspect.MAGIC, 2),
 //    			new ItemStack(Items.potionitem, 1, CustomPotionHelper.metadataTable[0][0]),
     			CustomPotionHelper.getSampleItem(1, 0, 0, false),
-    			new ItemStack[]{ new ItemStack(Items.gunpowder) })
-    			.setMode(InfusionBrewingRecipe.MODE.SPLASH);
+    			new ItemStack[]{ new ItemStack(Items.gunpowder) });
+//    			.setMode(InfusionBrewingRecipe.MODE.SPLASH);
     	ThaumcraftApi.getCraftingRecipes().add(iRecipe);
     	pages[1] = new ResearchPage(iRecipe);
     	
@@ -381,7 +386,7 @@ public class InfusionBrewing {
     	pages = new ResearchPage[2];
     	pages[0] = new ResearchPage("tc.research_page." + RESEARCH_AMULET + ".0");
     	research.setPages(pages);
-    	iRecipe = new InfusionBrewingRecipe(
+    	iRecipe = new InfusionBrewingRecipeBaubles(
     			RESEARCH_AMULET,
     			new ItemStack(itemPotionBaubles[0]),
     			8,
@@ -393,8 +398,8 @@ public class InfusionBrewing {
     				ItemApi.getItem("itemResource", 4), // Magic Tallow
     				ItemApi.getItem("itemResource", 7), // Enchanted Fabric
     				ItemApi.getItem("itemBaubleBlanks", 0) 
-    			})
-    			.setMode(InfusionBrewingRecipe.MODE.BAUBLES);
+    			});
+//    			.setMode(InfusionBrewingRecipe.MODE.BAUBLES);
     	ThaumcraftApi.getCraftingRecipes().add(iRecipe);
     	pages[1] = new ResearchPage(iRecipe);
     
@@ -407,7 +412,7 @@ public class InfusionBrewing {
     	pages = new ResearchPage[2];
     	pages[0] = new ResearchPage("tc.research_page." + RESEARCH_RING + ".0");
     	research.setPages(pages);
-    	iRecipe = new InfusionBrewingRecipe(
+    	iRecipe = new InfusionBrewingRecipeBaubles(
     			RESEARCH_RING,
     			new ItemStack(itemPotionBaubles[1]),
     			8,
@@ -419,8 +424,8 @@ public class InfusionBrewing {
     				ItemApi.getItem("itemResource", 4), // Magic Tallow
     				ItemApi.getItem("itemResource", 7), // Enchanted Fabric
     				ItemApi.getItem("itemBaubleBlanks", 1)
-    			})
-    			.setMode(InfusionBrewingRecipe.MODE.BAUBLES);
+    			});
+//    			.setMode(InfusionBrewingRecipe.MODE.BAUBLES);
     	ThaumcraftApi.getCraftingRecipes().add(iRecipe);
     	pages[1] = new ResearchPage(iRecipe);
 
@@ -433,7 +438,7 @@ public class InfusionBrewing {
     	pages = new ResearchPage[2];
     	pages[0] = new ResearchPage("tc.research_page." + RESEARCH_BELT + ".0");
     	research.setPages(pages);
-    	iRecipe = new InfusionBrewingRecipe(
+    	iRecipe = new InfusionBrewingRecipeBaubles(
     			RESEARCH_BELT,
     			new ItemStack(itemPotionBaubles[2]),
     			8,
@@ -445,8 +450,8 @@ public class InfusionBrewing {
     				ItemApi.getItem("itemResource", 4), // Magic Tallow
     				ItemApi.getItem("itemResource", 7), // Enchanted Fabric
     				ItemApi.getItem("itemBaubleBlanks", 2)
-    			})
-    			.setMode(InfusionBrewingRecipe.MODE.BAUBLES);
+    			});
+//    			.setMode(InfusionBrewingRecipe.MODE.BAUBLES);
     	ThaumcraftApi.getCraftingRecipes().add(iRecipe);
     	pages[1] = new ResearchPage(iRecipe);
     	
@@ -461,7 +466,7 @@ public class InfusionBrewing {
     	pages = new ResearchPage[2];
     	pages[0] = new ResearchPage("tc.research_page." + RESEARCH_FOCUS + ".0");
     	research.setPages(pages);
-    	iRecipe = new InfusionBrewingRecipe(
+    	iRecipe = new InfusionBrewingRecipeFocus(
     			RESEARCH_FOCUS,
     			new ItemStack(itemPotionFocus),
     			8,
@@ -473,8 +478,8 @@ public class InfusionBrewing {
     				ItemApi.getItem("itemResource", 0), // Almentum
     				ItemApi.getItem("itemResource", 1), // Nitor
     				ItemApi.getItem("itemResource", 15), // Primal Charm
-    			})
-    			.setMode(InfusionBrewingRecipe.MODE.FOCUS);
+    			});
+//    			.setMode(InfusionBrewingRecipe.MODE.FOCUS);
     	ThaumcraftApi.getCraftingRecipes().add(iRecipe);
     	pages[1] = new ResearchPage(iRecipe);
     	
@@ -486,7 +491,7 @@ public class InfusionBrewing {
     			6, 1, 3, new String[]{ RESEARCH_AMPLIFIER }, false,
     			new ItemStack(itemSpawnerUpgrade, 1, 3), pages);
     	for(int i = 0; i < 4; i++){
-	    	iRecipe = new InfusionBrewingRecipe(RESEARCH_SPAWNER_POWER,
+	    	iRecipe = new InfusionBrewingRecipeUpgrade(RESEARCH_SPAWNER_POWER,
 	    			new ItemStack(itemSpawnerUpgrade, 1, i), 2 + i * 3,
 	    			new AspectList()
 	    				.add(Aspect.SOUL, 12 * (i + 1))
@@ -506,7 +511,8 @@ public class InfusionBrewing {
 	    				(i == 0) ? new ItemStack(Items.blaze_powder) : new ItemStack(Items.magma_cream),
 	    				(i < 2) ? new ItemStack(Items.redstone) : new ItemStack(Blocks.redstone_block),
 	    				(i < 3) ? new ItemStack(Items.dye) : new ItemStack(Blocks.coal_ore)
-	    			}).setMode(InfusionBrewingRecipe.MODE.UPGRADE);
+	    			});
+//	    			.setMode(InfusionBrewingRecipe.MODE.UPGRADE);
 	    	ThaumcraftApi.getCraftingRecipes().add(iRecipe);
 	    	pages[i + 1] = new ResearchPage(iRecipe);
     	}
@@ -518,7 +524,7 @@ public class InfusionBrewing {
     			6, 3, 3, new String[]{ RESEARCH_AMPLIFIER }, false,
     			new ItemStack(itemSpawnerUpgrade, 1, 7), pages);
     	for(int i = 0; i < 4; i++){
-	    	iRecipe = new InfusionBrewingRecipe(RESEARCH_SPAWNER_SPEED,
+	    	iRecipe = new InfusionBrewingRecipeUpgrade(RESEARCH_SPAWNER_SPEED,
 	    			new ItemStack(itemSpawnerUpgrade, 1, i + 4), 2 + i * 3,
 	    			new AspectList()
 	    				.add(Aspect.MOTION, 12 * (i + 1))
@@ -538,7 +544,8 @@ public class InfusionBrewing {
     					(i < 1) ? new ItemStack(Items.ender_pearl) : new ItemStack(Items.ender_eye),
 	    				(i < 2) ? new ItemStack(Items.glowstone_dust) : new ItemStack(Blocks.glowstone),
 	    				(i < 3) ? new ItemStack(Items.emerald) : new ItemStack(Blocks.emerald_ore)
-	    			}).setMode(InfusionBrewingRecipe.MODE.UPGRADE);
+	    			});
+//	    			.setMode(InfusionBrewingRecipe.MODE.UPGRADE);
 	    	ThaumcraftApi.getCraftingRecipes().add(iRecipe);
 	    	pages[i + 1] = new ResearchPage(iRecipe);
     	}

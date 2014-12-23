@@ -1,7 +1,8 @@
-package mariri.infusionbrewing.misc;
+package mariri.infusionbrewing.recipe;
 
 import java.util.ArrayList;
 
+import mariri.infusionbrewing.misc.CustomPotionHelper;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemPotion;
@@ -12,11 +13,11 @@ import thaumcraft.api.ThaumcraftApiHelper;
 import thaumcraft.api.aspects.AspectList;
 import thaumcraft.api.crafting.InfusionRecipe;
 
-public class InfusionBrewingRecipe extends InfusionRecipe {
+public abstract class InfusionBrewingRecipe extends InfusionRecipe {
 	
 	public enum MODE { AMPLIFIER, DURATION, SPLASH, BAUBLES, FOCUS, UPGRADE };
 	
-	private MODE mode = MODE.AMPLIFIER;
+//	protected static MODE mode;
 	
 //	private CustomPotionHelper compomentEffect;
 	
@@ -28,10 +29,12 @@ public class InfusionBrewingRecipe extends InfusionRecipe {
 //		}
 	}
 	
-	public InfusionBrewingRecipe setMode(MODE mode){
-		this.mode = mode;
-		return this;
-	}
+//	public InfusionBrewingRecipe setMode(MODE mode){
+//		this.mode = mode;
+//		return this;
+//	}
+	
+	public abstract MODE getMode();
 	
 	@Override
 	public boolean matches(ArrayList<ItemStack> input, ItemStack central, World world, EntityPlayer player) {
@@ -45,18 +48,18 @@ public class InfusionBrewingRecipe extends InfusionRecipe {
 		
 		if(central.getItem() == Items.potionitem && central.getTagCompound() == null) { return false; }
 		
-		if (!areItemStacksEqual(i2, getRecipeInput(), true)) return false;
+		if (!isItemStacksEqual(i2, getRecipeInput(), true)) return false;
 		
 		if(i2.getItem() == Items.potionitem){
 			NBTTagCompound tag = CustomPotionHelper.findPotionNBT(i2);
 			CustomPotionHelper potion = CustomPotionHelper.getInstanceFromNBTTag(tag);
-			if(mode == MODE.AMPLIFIER && potion.isMaxAmplifier()){ return false; }
-			else if(mode == MODE.DURATION && potion.isMaxDuration()){ return false; }
-			else if(mode == MODE.SPLASH && ItemPotion.isSplash(i2.getItemDamage())) { return false; }
-			else if(mode == MODE.BAUBLES){
+			if(getMode() == MODE.AMPLIFIER && potion.isMaxAmplifier()){ return false; }
+			else if(getMode() == MODE.DURATION && potion.isMaxDuration()){ return false; }
+			else if(getMode() == MODE.SPLASH && ItemPotion.isSplash(i2.getItemDamage())) { return false; }
+			else if(getMode() == MODE.BAUBLES){
 				 if(potion.isInstant()){ return false; }
 				 else if(!potion.isMaxDuration()) { return false; }
-			}else if(mode == MODE.FOCUS) {
+			}else if(getMode() == MODE.FOCUS) {
 				if(!ItemPotion.isSplash(i2.getItemDamage())){ return false; }
 				else if(!potion.isMaxDuration()){ return false; }
 			}
@@ -82,7 +85,7 @@ public class InfusionBrewingRecipe extends InfusionRecipe {
 //					 compomentEffect = potion;
 //				 }
 
-				if (areItemStacksEqual(i2, comp,true)) {
+				if (isItemStacksEqual(i2, comp,true)) {
 					ii.remove(a);
 					b = true;
 					break;
@@ -93,9 +96,7 @@ public class InfusionBrewingRecipe extends InfusionRecipe {
 		return ii.size() == 0 ? true : false;
     }
 	
-	@Override
-	protected boolean areItemStacksEqual(ItemStack stack0, ItemStack stack1, boolean fuzzy)
-    {
+	public boolean isItemStacksEqual(ItemStack stack0, ItemStack stack1, boolean fuzzy){
 		if (stack0 == null && stack1 != null) return false;
 		if (stack0 != null && stack1 == null) return false;
 		if (stack0 == null && stack1 == null) return true;
@@ -110,7 +111,7 @@ public class InfusionBrewingRecipe extends InfusionRecipe {
 			t1 &= stack0.getItemDamage() == stack1.getItemDamage();
 		}
 		
-		if(mode == MODE.UPGRADE && stack0.getItem() == Items.potionitem && stack1.getItem() == Items.potionitem){
+		if(getMode() == MODE.UPGRADE && stack0.getItem() == Items.potionitem && stack1.getItem() == Items.potionitem){
 			CustomPotionHelper p0 = CustomPotionHelper.getInstanceFromNBTTag(CustomPotionHelper.findPotionNBT(stack0));
 			CustomPotionHelper p1 = CustomPotionHelper.getInstanceFromNBTTag(CustomPotionHelper.findPotionNBT(stack1));
 			t1 &= p0.getId() == p1.getId();
@@ -118,7 +119,6 @@ public class InfusionBrewingRecipe extends InfusionRecipe {
 //			t1 &= p0.getDuration() == p1.getDuration();
 //			t1 &= ItemPotion.isSplash(stack0.getItemDamage()) == ItemPotion.isSplash(stack1.getItemDamage());
 		}
-
         return t1;
     }
 	
@@ -129,7 +129,7 @@ public class InfusionBrewingRecipe extends InfusionRecipe {
 		if(tag == null) { return super.getRecipeOutput(input); }
 		CustomPotionHelper potion = CustomPotionHelper.getInstanceFromNBTTag(tag);
 		if(potion.getId() <= 0){ return super.getRecipeOutput(input); }
-		if(mode == MODE.AMPLIFIER){
+		if(getMode() == MODE.AMPLIFIER){
 			potion.incrementAmplifier();
 			if(ItemPotion.isSplash(input.getItemDamage())){
 				output.setItemDamage(CustomPotionHelper.vanillaMetadataTable[potion.getId() - 1][2]);
@@ -137,7 +137,7 @@ public class InfusionBrewingRecipe extends InfusionRecipe {
 				output.setItemDamage(CustomPotionHelper.vanillaMetadataTable[potion.getId() - 1][0]);
 			}
 			potion.writeToNBTTag(tag);
-		}else if(mode == MODE.DURATION){
+		}else if(getMode() == MODE.DURATION){
 			potion.incrementDurationCode();
 			if(ItemPotion.isSplash(input.getItemDamage())){
 				output.setItemDamage(CustomPotionHelper.vanillaMetadataTable[potion.getId() - 1][2]);
@@ -145,9 +145,9 @@ public class InfusionBrewingRecipe extends InfusionRecipe {
 				output.setItemDamage(CustomPotionHelper.vanillaMetadataTable[potion.getId() - 1][1]);
 			}
 			potion.writeToNBTTag(tag);
-		}else if(mode == MODE.SPLASH){
+		}else if(getMode() == MODE.SPLASH){
 			output.setItemDamage(CustomPotionHelper.vanillaMetadataTable[potion.getId() - 1][2]);
-		}else if(mode == MODE.BAUBLES || mode == MODE.FOCUS){
+		}else if(getMode() == MODE.BAUBLES || getMode() == MODE.FOCUS){
 			output = ((ItemStack)super.getRecipeOutput(input)).copy();
 			CustomPotionHelper helper = CustomPotionHelper.getInstanceFromNBTTag(CustomPotionHelper.findPotionNBT(input));
 			output.setItemDamage(helper.encodeToCustomMetadata(false));

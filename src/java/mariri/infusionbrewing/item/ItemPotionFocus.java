@@ -1,6 +1,5 @@
 package mariri.infusionbrewing.item;
 
-import java.lang.reflect.Method;
 import java.text.DecimalFormat;
 import java.util.List;
 
@@ -9,7 +8,6 @@ import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.projectile.EntityPotion;
-import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -21,11 +19,13 @@ import net.minecraft.world.World;
 import thaumcraft.api.ThaumcraftApiHelper;
 import thaumcraft.api.aspects.Aspect;
 import thaumcraft.api.aspects.AspectList;
-import thaumcraft.api.wands.IWandFocus;
+import thaumcraft.api.wands.FocusUpgradeType;
+import thaumcraft.api.wands.ItemFocusBasic;
+import thaumcraft.common.items.wands.ItemWandCasting;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
-public class ItemPotionFocus extends Item implements IWandFocus {
+public class ItemPotionFocus extends ItemFocusBasic {
 
 	private IIcon ornament, depth;
 
@@ -38,27 +38,32 @@ public class ItemPotionFocus extends Item implements IWandFocus {
 	}
 	
 	@Override
-	public int getFocusColor(){
+	public int getFocusColor(ItemStack itemstack){
 		return 0xFF60FF;
+	}
+	
+	@Override
+	public FocusUpgradeType[] getPossibleUpgradesByRank(ItemStack itemstack, int i){
+		return new FocusUpgradeType[]{};
 	}
 	
 	/**
 	 * @return An icon that will be drawn as a block inside the focus "block".
 	 */
 	@Override
-	public IIcon getFocusDepthLayerIcon(){
+	public IIcon getFocusDepthLayerIcon(ItemStack itemstack){
 		return depth;
 	}
 	
 	@Override
-	public IIcon getOrnament(){
+	public IIcon getOrnament(ItemStack itemstack){
 		return ornament;
 	}
 	
-	@Override
-	public WandFocusAnimation getAnimation(){
-		return WandFocusAnimation.WAVE;
-	}
+//	@Override
+//	public WandFocusAnimation getAnimation(ItemStack itemstack){
+//		return WandFocusAnimation.WAVE;
+//	}
 	
 	
 	/**
@@ -67,12 +72,12 @@ public class ItemPotionFocus extends Item implements IWandFocus {
 	 * It is returned as an AspectList to allow for multiple vis types in different ratios.
 	 */
 	@Override
-	public AspectList getVisCost(){
+	public AspectList getVisCost(ItemStack itemstack){
 		return new AspectList().add(Aspect.FIRE, 100).add(Aspect.ENTROPY, 50);
 	}
 	
-	protected AspectList getVisCost(CustomPotionHelper potion){
-		AspectList cost = getVisCost();
+	protected AspectList getVisCost(ItemStack itemstack, CustomPotionHelper potion){
+		AspectList cost = getVisCost(itemstack);
 		for(Aspect vis : Aspect.getPrimalAspects()){
 			if(cost.getAmount(vis) > 0){
 				cost.add(vis, cost.getAmount(vis) * potion.getAmplifier());
@@ -82,7 +87,7 @@ public class ItemPotionFocus extends Item implements IWandFocus {
 	}
 	
 	@Override
-	public boolean isVisCostPerTick(){
+	public boolean isVisCostPerTick(ItemStack itemstack){
 		return false;
 	}
 
@@ -90,7 +95,8 @@ public class ItemPotionFocus extends Item implements IWandFocus {
 	public ItemStack onFocusRightClick(ItemStack itemstack, World world, EntityPlayer player, MovingObjectPosition movingobjectposition){
 
         if (!world.isRemote){
-        	ItemStack focus = getFocusItem(itemstack);
+        	ItemStack focus = ((ItemWandCasting)itemstack.getItem()).getFocusItem(itemstack);
+//        	ItemStack focus = getFocusItem(itemstack);
             NBTTagCompound tag = CustomPotionHelper.findPotionNBT(focus);
             CustomPotionHelper effect = new CustomPotionHelper(1, 0, 0);
             if(tag.hasKey("Id")){
@@ -99,7 +105,7 @@ public class ItemPotionFocus extends Item implements IWandFocus {
             	effect.decodeFromCustomMetadata(focus.getItemDamage());
             }
         	effect.setDurationCode(0);
-        	if(ThaumcraftApiHelper.consumeVisFromWand(itemstack, player, getVisCost(effect), true, false)){
+        	if(ThaumcraftApiHelper.consumeVisFromWand(itemstack, player, getVisCost(itemstack, effect), true, false)){
                 world.playSoundAtEntity(player, "random.bow", 0.5F, 0.4F / (itemRand.nextFloat() * 0.4F + 0.8F));
                 ItemStack potion = effect.getSampleItem(true);
         		world.spawnEntityInWorld(new EntityPotion(world, player, potion));
@@ -169,9 +175,9 @@ public class ItemPotionFocus extends Item implements IWandFocus {
 		String name = StatCollector.translateToLocal(Potion.potionTypes[potion.getId()].getName());
 		String lv = StatCollector.translateToLocal("potion.potency." + potion.getAmplifier());
 		tooltip.add(name + " " + lv);
-		AspectList al = this.getVisCost(potion);
+		AspectList al = this.getVisCost(itemstack, potion);
 		if (al!=null && al.size()>0) {
-			tooltip.add(StatCollector.translateToLocal(isVisCostPerTick() ? "item.Focus.cost2" : "item.Focus.cost1"));
+			tooltip.add(StatCollector.translateToLocal(isVisCostPerTick(itemstack) ? "item.Focus.cost2" : "item.Focus.cost1"));
 			for (Aspect aspect : al.getAspectsSorted()) {
 				DecimalFormat myFormatter = new DecimalFormat("#####.##");
 				String amount = myFormatter.format(al.getAmount(aspect) / 100f);
@@ -193,20 +199,21 @@ public class ItemPotionFocus extends Item implements IWandFocus {
 	@Override
 	public void registerIcons(IIconRegister iconregister){
 		this.itemIcon = iconregister.registerIcon("mariri:focus_potion");
+		this.icon = this.itemIcon;
 	}
 	
-	private ItemStack getFocusItem(ItemStack stack){
-		ItemStack focus = new ItemStack(Blocks.air);
-		try {
-			Item item = stack.getItem();
-			Class clazz = item.getClass();
-			Method method = clazz.getMethod("getFocusItem", new Class[]{ ItemStack.class });
-			focus = (ItemStack)method.invoke(item, new Object[]{ stack });
-		} catch (Exception ex) {
-//			FMLLog.warning("[Thaumcraft] Could not retrieve item identified by: " + itemString);
-		}
-		return focus;
-	}
+//	private ItemStack getFocusItem(ItemStack stack){
+//		ItemStack focus = new ItemStack(Blocks.air);
+//		try {
+//			Item item = stack.getItem();
+//			Class clazz = item.getClass();
+//			Method method = clazz.getMethod("getFocusItem", new Class[]{ ItemStack.class });
+//			focus = (ItemStack)method.invoke(item, new Object[]{ stack });
+//		} catch (Exception ex) {
+////			FMLLog.warning("[Thaumcraft] Could not retrieve item identified by: " + itemString);
+//		}
+//		return focus;
+//	}
 	
 //	private boolean consumeAllVis(ItemStack itemstack, EntityPlayer player, AspectList aspects, boolean doit, boolean crafting){
 //		boolean result = false;
