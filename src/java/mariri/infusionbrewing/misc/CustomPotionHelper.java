@@ -75,7 +75,7 @@ public class CustomPotionHelper {
 	public CustomPotionHelper(int id, int duration, int amplifier){
 		this.id = id;
 		this.duration = this.isInstant() ? INSTANT_DURATION : duration;
-		this.amplifier = amplifier;
+		this.amplifier = this.isNoAmplifier() ? 0 : amplifier;
 	}
 	
 	public CustomPotionHelper setId(int value){
@@ -89,7 +89,7 @@ public class CustomPotionHelper {
 	}
 	
 	public CustomPotionHelper setAmplifier(int value){
-		this.amplifier = value;
+		this.amplifier = this.isNoAmplifier() ? 0 : value;
 		return this;
 	}
 	

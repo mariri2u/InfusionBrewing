@@ -58,7 +58,7 @@ import cpw.mods.fml.common.registry.GameRegistry;
 @Mod(modid = InfusionBrewing.MODID, version = InfusionBrewing.VERSION, dependencies = InfusionBrewing.DEPENDENCIES )
 public class InfusionBrewing {
     public static final String MODID = "InfusionBrewing";
-    public static final String VERSION = "1.7.10-1.3";
+    public static final String VERSION = "1.7.10-1.3a";
     public static final String DEPENDENCIES = "required-after:Thaumcraft";
 //    public static final String DEPENDENCIES = "after:Thaumcraft";
     
